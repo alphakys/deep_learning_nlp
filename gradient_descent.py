@@ -9,10 +9,6 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.optimizers import SGD
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 raw_df = pd.read_csv("boston.csv")
@@ -37,26 +33,18 @@ y = raw_df['PRICE']
 ssc = StandardScaler()
 x_reshape = X.values.reshape(-1, 1)
 
-
-# 4.98
-# 9.14
-# 4.03
 fit_x = ssc.fit(x_reshape)
-
-print(fit_x.mean_)
-print(fit_x.scale_)
-print((4.98 - fit_x.mean_) / fit_x.scale_)
 
 X_std = ssc.fit_transform(x_reshape)
 
 print(X_std)
+
+
+
+
+
 exit()
 
-X_std1 = ssc.fit_transform(fitted_x)
-
-print(X_std)
-print('🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉')
-print(X_std1)
 
 # StandardScaler().fit_transform(X)
 
