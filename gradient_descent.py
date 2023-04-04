@@ -1,32 +1,84 @@
+import os
+from decimal import Decimal
+
 import numpy as np
 import pandas as pd
 from pandas import Series
 import matplotlib.pyplot as plt
 
-from sklearn import datasets
-
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import SGD
 
-
-# body_df = pd.DataFrame(
-#     {"height": [65.78, 71.52, 69.40, 68.22, 67.79], "weight": [112.99, 136.49, 153.03, 142.34, 144.30]})
-
-# print(body_df)
-line_fitter = LinearRegression()
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 raw_df = pd.read_csv("boston.csv")
 X = raw_df['LSTAT']
 y = raw_df['PRICE']
 
 # [STUDY]
+#  용어정리
+#  * NORMALIZATION / scikit-learn에서 MinMaxScaler를 사용하면 0과 1사이의 값으로 변환해준다.
+#  * STANDARDIZATION / scikit-learn에서 StandardScaler를 사용하면 평균이 0이고 표준편차가 1인 값으로 변환해준다.
+#  * np.array(X, float)는 C의 array와 똑같다고 한다. 그래서 두번째 argument에 type을 넣어주어야 함
+
+# [STUDY]
+#   StandardScaler 정리
+#
+#   data = [[0, 0], [0, 0], [1, 1], [1, 1]]
+#   ssc.fit(data))
+#   ssc.mean_ 평균
+#   ssc.scale_ 표준편차
+#   ssc.var_ 분산
+
+ssc = StandardScaler()
+x_reshape = X.values.reshape(-1, 1)
+
+
+# 4.98
+# 9.14
+# 4.03
+fit_x = ssc.fit(x_reshape)
+
+print(fit_x.mean_)
+print(fit_x.scale_)
+print((4.98 - fit_x.mean_) / fit_x.scale_)
+
+X_std = ssc.fit_transform(x_reshape)
+
+print(X_std)
+exit()
+
+X_std1 = ssc.fit_transform(fitted_x)
+
+print(X_std)
+print('🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉')
+print(X_std1)
+
+# StandardScaler().fit_transform(X)
+
+
+exit()
+line_fitter = LinearRegression()
+
+# [STUDY]
 #  1. reshape(a,b) a는 차원을 말함 // b는 a차원의 원소의 개수를 말함
 #  x.values.reshape(1, -1)
+#  fit 메서드는 기울기 line_fitter.coef_와 절편 line_fitter.intercept_를 전달한다.
+#  여기서 주의해야 할 점은 X데이터를 넣을 때 .values.reshape(-1,1)를 해줬다는 거다. 왜냐하면 X는 2차원 array 형태여야 하기 때문이다.
+#  이런 식으로 [[x1], [x2], [x3], ... , [xn]] . (이렇게 넣는 이유는 X 변수가 하나가 아니라 여러개일 때 다중회귀분석을 실시하기 위함인데,
+#  이는 다른 포스팅에서 소개한다.)
 linear_line = line_fitter.fit(X.values.reshape(-1, 1), y)
 
-plt.plot(X, y, 'o')
-plt.plot(X, line_fitter.predict(X.values.reshape(-1,1)), color='red')
+print(linear_line.predict([[20]]))
 
+print(linear_line.intercept_)
+
+plt.plot(X, y, 'o')
+plt.plot(X, line_fitter.predict(X.values.reshape(-1, 1)), color='red')
 
 plt.show()
 
