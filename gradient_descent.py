@@ -1,7 +1,8 @@
+import math
 import os
 from decimal import Decimal
-
 import numpy as np
+
 import pandas as pd
 from pandas import Series
 import matplotlib.pyplot as plt
@@ -9,87 +10,25 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-from scipy import misc
+y_true = [4, 2, 3, 4, 5]
+y_pred = [1, 2, 3, 4, 5]
 
-black_pix = [100, 1, 1]
+ms = list(map(lambda x, y: (x-y)**2, y_true, y_pred))
+
+print(sum(ms)/len(ms))
+
+mse = mean_squared_error(y_true=y_true, y_pred=y_pred)
+
+print(mse)
+exit()
+
 
 # [STUDY] ROW MAJOR ORDER -> ------->
 #  COLUMN MAJOR ORDER -> ||||||||||
-
-arr = np.ndarray(shape=(10, 10), dtype=int, order='C')
-
-print(arr)
-
-plt.imshow(arr)
-plt.show()
-
-exit()
-arr = []
-for i in range(500):
-    arr.append([black_pix]*500)
-
-arr = np.array(arr)
-print(arr.shape)
-plt.imshow(arr)
-
-plt.show()
-exit()
-
-
-imgs = []
-line = []
-for i in range(50):
-    for j in range(50):
-        line.append(black_pix)
-    imgs.append(line)
-
-print(np.reshape(imgs, (50,50)))
-
-print(len(imgs))
-plt.imshow(imgs)
-plt.show()
-
-
-exit()
-
-img = misc.face()
-
-arr1 = np.array([[0, 0], [1, 1], [2, 4]], dtype=int)
-
-# 756 1024
-nd_arr = np.array([[0, 0, 0] for i in range(256)])
-
-print(nd_arr)
-# print( [ [0, 0, 0] for i in range(256)]    )
-
-
-# plt.imshow(img)
-# plt.show()
-# print(img)
-exit()
-
-img_arr = img / 255
-
-red_array = img_arr[:, :, 0]
-green_array = img_arr[:, :, 1]
-blue_array = img_arr[:, :, 2]
-
-exit()
-l = [
-    [2, 3, 54],
-    [3, 4, 5],
-    [3, 2, 2, 3, ]
-]
-
-for i in l:
-    print(i)
-
-# print(l)
-
-exit()
 
 raw_df = pd.read_csv("boston.csv")
 X1 = raw_df['RM']
@@ -99,26 +38,16 @@ y = raw_df['PRICE']
 multi_dataframe = raw_df[[
     'CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT']]
 
-# plt.scatter(multi_dataframe['LSTAT'].values, y, alpha=0.4)
-# plt.scatter(multi_dataframe['RM'].values, y, alpha=0.4)
-ms = MinMaxScaler()
-# scale_X1 = ms.fit_transform(X1.values.reshape(-1, 1))
-# scale_X2 = ms.fit_transform(X2.values.reshape(-1, 1))
+# [STUDY]
+#  scaling
+#  MinMaxScaler란 데이터의 최대값과 최소값을 바탕으로 모든 데이터를 0에서 1사이의 값으로 환산하는 것을 의미한다.
 
+ms = MinMaxScaler()
 two_feature_dataframe = raw_df[['RM', 'LSTAT']]
 
 plt.scatter(two_feature_dataframe['RM'].values, two_feature_dataframe['LSTAT'].values, alpha=0.4)
 
 plt.show()
-# ms_fit_X = ms.fit_transform(two_feature_dataframe.values)
-
-# 로지스틱 회귀는 0과 1사이의 값으로 확률적으로 환산하여 해석한다.
-
-# log_odds의 값이 1이상 일수록 일어나지 않을 확률에 비하여 일어날 확률이 비율적으로 더 높다를 의미한다.
-# log_odds = log(p / (1 - p))
-# supervised learning을 하려고 해도 결과값이 있어야 결과값을 향하여 학습을 할 수 있는데 결과값이 없다.
-# 결론 machine learning을 돌릴 수 없다.
-
 
 exit()
 # [STUDY]
