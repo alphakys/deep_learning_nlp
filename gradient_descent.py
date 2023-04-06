@@ -4,6 +4,7 @@ from decimal import Decimal
 import numpy as np
 
 import pandas as pd
+from numpy import ndarray
 from pandas import Series
 import matplotlib.pyplot as plt
 
@@ -12,20 +13,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-y_true = [4, 2, 3, 4, 5]
-y_pred = [1, 2, 3, 4, 5]
-
-ms = list(map(lambda x, y: (x-y)**2, y_true, y_pred))
-
-print(sum(ms)/len(ms))
-
-mse = mean_squared_error(y_true=y_true, y_pred=y_pred)
-
-print(mse)
-exit()
-
 
 # [STUDY] ROW MAJOR ORDER -> ------->
 #  COLUMN MAJOR ORDER -> ||||||||||
@@ -34,6 +23,30 @@ raw_df = pd.read_csv("boston.csv")
 X1 = raw_df['RM']
 X2 = raw_df['LSTAT']
 y = raw_df['PRICE']
+
+r: ndarray = X1.values.reshape(-1, 1)
+
+test_x = X1.values.reshape(-1, 1)
+
+lr = LinearRegression()
+lr.fit(test_x, y)
+
+print(lr.score(test_x, y))
+
+plt.plot(test_x, y, 'o')
+plt.plot(test_x, lr.predict(test_x), color='red')
+#plt.show()
+
+
+
+
+exit()
+
+
+
+
+
+
 
 multi_dataframe = raw_df[[
     'CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT']]
