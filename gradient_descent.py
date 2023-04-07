@@ -1,9 +1,14 @@
 import math
 import os
+import time
 from decimal import Decimal
 import numpy as np
 
 import pandas as pd
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import tensorflow as tf
+
 from numpy import ndarray
 from pandas import Series
 import matplotlib.pyplot as plt
@@ -11,10 +16,222 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error as mse
+
+raw_df = pd.read_csv("boston.csv")
+X1 = raw_df['RM']
+X2 = raw_df['LSTAT']
+
+# 생각해보자 price라고 하는 것은 결국 13개의 (혹은 더 많은 parameter가 있을 수 있겠지) feature에 의해서 도출된 결과값이다.
+# 그리고 내가 지금까지 한 것은 한 feature에 대한 prediction을 수행한 것이었다.
+# 여러 개의 feature에 대한 prediction을 수행할 수도 있었겠지
+
+y = raw_df['PRICE'].values.reshape(-1, 1)
+
+ss = StandardScaler()
+
+st_X1: ndarray = ss.fit_transform(X=X1.values.reshape(-1, 1))
+st_X2: ndarray = ss.fit_transform(X=X2.values.reshape(-1, 1))
+
+# [STUDY]
+#   1. StandardScaler한 input 데이터의 평균과 y의 평균을 구한다.
+#   2. 그리고 true값이라고 해야할까. 여튼 평균을 기준으로 각 데이터들이 얼마나 떨어져 있는지를 구한다. 이것이 error이다.
+#   3.
+
+# [STUDY]
+#   uniform안의 배열이 shape을 의미하는 듯하다.[3,3]
+# weight
+W = tf.Variable(tf.random.uniform([1], 0, 1.0))
+# bias
+b = tf.Variable(tf.random.uniform([1], 0, 1.0))
+
+X = st_X1
+
+H = W * X + b
+cost = tf.reduce_mean(tf.square(H - y))
+
+# 한 번에 얼마만큼 점프하는지 -> learning rate를 의미하는 듯
+learning_rate = tf.Variable(0.01)
+
+print(tf.GradientTape.gradient(3, 1))
+
+optimizer = tf.compat.v1.train.GradientDescentOptimizer(learning_rate=learning_rate)
+train = optimizer.minimize(cost)  # cost를 최소화하는 방향으로 train
+
+init = tf.compat.v1.global_variables_initializer()
 
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# [STUDY] 1은 row major order를 의미한다.
+#    0은 column major order를 의미한다.
+
+
+
+
+
+
+# cost = tf.reduce_mean()
+# X = tf.p(tf.float32, shape=[None])
+
+
+exit()
+
+
+# print(residual_multiple_sum / residual_x_square.sum())
+def ordinary_least_square(x: ndarray, y: ndarray):
+    pass
+    # residual_x = st_X1 - x_mean
+    # residual_y = y - y_mean
+    #
+    # residual_multiple_sum = (residual_x * residual_y).sum()
+    #
+    # residual_x_square = residual_x ** 2
+    #
+    # ols_raw_list = (residual_x * residual_y) / residual_x_square
+    # return np.sum(x*y)/np.sum(x*x)
+
+
+# print((residual_x * residual_y)[:5])
+
+exit()
+
+lr1 = LinearRegression()
+lr1.fit(st_X1, y)
+lr1.predict(st_X1)
+
+fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6.15))
+
+ax[0].scatter(st_X1, y, c='blue', marker='o', label='true')
+ax[1].scatter(st_X1, lr1.predict(st_X1), c='k', marker='x', label='error')
+
+fig.show()
+
+exit()
+
+lr1 = LinearRegression()
+lr2 = LinearRegression()
+# 이것은 결국 방개수에 대한 price를 예측하기 위한 그래프 즉 coefficient와 intercept를 구하기 위한 코드
+lr1.fit(st_X1, y)
+lr2.fit(st_X2, y)
+# fit(coefficient, intercept)를 통해서 구해질 예측값
+
+
+# ** 예측값들의 array **
+prd_X1 = lr1.predict(st_X1)
+prd_X2 = lr2.predict(st_X2)
+# ** 실제값들의 array **
+y_true = y.values
+
+# m = 20
+# # 가중치 인듯 정확하진 않음
+# theta1_true = 0.5
+# # x input data
+# x = np.linspace(-1, 1, m)
+# # true_y value
+# y = theta1_true * x
+
+# The plot: LHS is the data, RHS will be the cost function.
+# [STUDY] 여러 개의 graph 축 공유
+#   nrows 행으로 몇개의 그래프를 그릴 것인지, ncols 열로 몇개의 그래프를 그릴 것인지, fifsize는 그래프의 크기
+#   var1, var2 하면 initialize하는 value가 array이면 0-index = var1, 1-index = var2
+fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6.15))
+ax[0].scatter(st_X1, y, marker='x', s=30, color='k', label='Training data')
+
+
+def cost_func(theta1):
+    """The cost function, J(theta1) describing the goodness of fit."""
+    theta1 = np.atleast_2d(np.asarray(theta1))
+    return np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2
+
+
+def hypothesis(x, theta1):
+    """Our "hypothesis function", a straight line through the origin."""
+    return theta1 * x
+
+
+# First construct a grid of theta1 parameter pairs and their corresponding
+# cost function values.
+theta1_grid = np.linspace(-0.2, 1, 50)
+J_grid = cost_func(theta1_grid[:, np.newaxis])
+
+# [STUDY] arr[:, np.newaxis]는 arr을 2차원으로 만들어준다. 즉 1차원은 2차원으로 / 2차원은 3차원으로 한 축을 늘려준다.
+# The cost function as a function of its single parameter, theta1.
+ax[1].plot(theta1_grid, J_grid, 'k')
+
+print(J_grid)
+# plt.show()
+
+exit()
+
+# Take N steps with learning rate alpha down the steepest gradient,
+# starting at theta1 = 0.
+N = 5
+alpha = 1
+theta1 = [0]
+J = [cost_func(theta1[0])[0]]
+for j in range(N - 1):
+    last_theta1 = theta1[-1]
+    this_theta1 = last_theta1 - alpha / m * np.sum(
+        (hypothesis(x, last_theta1) - y) * x)
+    theta1.append(this_theta1)
+    J.append(cost_func(this_theta1))
+
+# Annotate the cost function plot with coloured points indicating the
+# parameters chosen and red arrows indicating the steps down the gradient.
+# Also plot the fit function on the LHS data plot in a matching colour.
+colors = ['b', 'g', 'm', 'c', 'orange']
+ax[0].plot(x, hypothesis(x, theta1[0]), color=colors[0], lw=2,
+           label=r'$\theta_1 = {:.3f}$'.format(theta1[0]))
+for j in range(1, N):
+    ax[1].annotate('', xy=(theta1[j], J[j]), xytext=(theta1[j - 1], J[j - 1]),
+                   arrowprops={'arrowstyle': '->', 'color': 'r', 'lw': 1},
+                   va='center', ha='center')
+    ax[0].plot(x, hypothesis(x, theta1[j]), color=colors[j], lw=2,
+               label=r'$\theta_1 = {:.3f}$'.format(theta1[j]))
+
+# Labels, titles and a legend.
+ax[1].scatter(theta1, J, c=colors, s=40, lw=0)
+ax[1].set_xlim(-0.2, 1)
+ax[1].set_xlabel(r'$\theta_1$')
+ax[1].set_ylabel(r'$J(\theta_1)$')
+ax[1].set_title('Cost function')
+ax[0].set_xlabel(r'$x$')
+ax[0].set_ylabel(r'$y$')
+ax[0].set_title('Data and fit')
+ax[0].legend(loc='upper left', fontsize='small')
+
+plt.tight_layout()
+plt.show()
+
+exit()
+
+a = np.linspace(1, 10, num=10)
+
+print(a)
+exit()
+print("mse : ", mse(y_true, prd_X1, multioutput='raw_values'))
+
+exit()
+
+# [STUDY] lr.score() 결정계수라고 하며
+#   예측한 값과 TRUE 값의 차이가 얼마나 적냐 즉 정확도가 얼마나 높냐를 나타내는 지표이다.
+#   0~ 1 사이의 값을 가지며 1에 가까울수록 정확도가 높다.
+print('x1 score : ', lr1.score(st_X1, y_true))
+print('x2 score : ', lr2.score(st_X2, y_true))
+
+# 기존 데이터를 바탕으로 도출된 그래프
+# plt.plot(X1, y, 'o')
+# 내가 학습시킨(coefficient, intercept)를 구한 모델을 바탕으로 그려진 그래프
+plt.plot(st_X1, lr1.predict(st_X1), color='black')
+plt.plot(st_X2, lr2.predict(st_X2), color='blue')
+
+plt.show()
+
+exit()
+
+# [STUDY]
+#   line_fitter.coef는 기울기를 의미한다.
+#   line_fitter.intercept는 y절편을 의미한다.
+
 
 # [STUDY] ROW MAJOR ORDER -> ------->
 #  COLUMN MAJOR ORDER -> ||||||||||
@@ -23,30 +240,6 @@ raw_df = pd.read_csv("boston.csv")
 X1 = raw_df['RM']
 X2 = raw_df['LSTAT']
 y = raw_df['PRICE']
-
-r: ndarray = X1.values.reshape(-1, 1)
-
-test_x = X1.values.reshape(-1, 1)
-
-lr = LinearRegression()
-lr.fit(test_x, y)
-
-print(lr.score(test_x, y))
-
-plt.plot(test_x, y, 'o')
-plt.plot(test_x, lr.predict(test_x), color='red')
-#plt.show()
-
-
-
-
-exit()
-
-
-
-
-
-
 
 multi_dataframe = raw_df[[
     'CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT']]
