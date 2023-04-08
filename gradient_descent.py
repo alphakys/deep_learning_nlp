@@ -64,8 +64,8 @@ init = tf.compat.v1.global_variables_initializer()
 # [STUDY] 1은 row major order를 의미한다.
 #    0은 column major order를 의미한다.
 
-
-
+# 자연상수 e와 로그에 대한 공부
+# 그리고 gradient descent를 tensorflow를 이용하지 않고 sklearn을 이용하여 구현해보자
 
 
 
