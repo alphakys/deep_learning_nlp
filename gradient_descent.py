@@ -1,5 +1,6 @@
 import math
 import os
+import random
 import time
 from decimal import Decimal
 import numpy as np
@@ -11,12 +12,17 @@ import tensorflow as tf
 
 from numpy import ndarray
 from pandas import Series
+
 import matplotlib.pyplot as plt
 
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error as mse
+
+import matplotlib
+matplotlib.use('TkAgg')
+
 
 raw_df = pd.read_csv("boston.csv")
 X1 = raw_df['RM']
@@ -32,6 +38,56 @@ ss = StandardScaler()
 
 st_X1: ndarray = ss.fit_transform(X=X1.values.reshape(-1, 1))
 st_X2: ndarray = ss.fit_transform(X=X2.values.reshape(-1, 1))
+
+# [STUDY]
+#   (pred-true)**2 -> bias
+#   (pred-pred_average)**2 -> variance(분산)
+# 예측값과 (예측값들의 평균)의 차이가 얼마인지를 그리고 그 차이가 클수록 에러가 높다.
+# irreducible error는 줄일 수 없는 에
+
+
+# The data to fit
+m = 20
+theta1_true = 0.5
+x = np.linspace(-1, 1, m)
+y = theta1_true * x
+
+fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6.15))
+ax[0].scatter(x, y, marker='x', s=40, color='k')
+
+def cost_func(theta1):
+    theta1 = np.atleast_2d(np.array(theta1))
+
+    # [STUDY] 1차원과 2차원의 array를 얼마든지 행렬 계산 할 수 있다.
+    #   굳이 1차원을 2차원으로 만들 필요가 없다.
+    #   대신 1차원으로 값이 반환된다. 그리고 행렬 계산을 위한 행/렬의 개수는 맞아야 함
+    # hypothesis.shape(50,20)
+    # y.shape(20,)
+    # 그래서 반환되는 값을 shape(50,20)을 row major order로 평균을 낸 값이 반횐됨
+
+    # hypothesis(x, theta1) 이 값은 결국 x를 50세트를 만드는
+    print(np.average((y - hypothesis(x, theta1)) ** 2, axis=1))
+    print(np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2)
+    return np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2
+    #return np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2
+
+
+def hypothesis(x, theta1):
+    # our hypothesis function, a straight line through the origin
+    return theta1 * x
+
+# theta1_grid가 x값
+theta1_grid = np.linspace(-0.2, 1, 50)
+
+#print(x)
+
+J_grid = cost_func(theta1_grid.reshape(-1, 1))
+
+J_grid = cost_func(theta1_grid)
+
+
+
+exit()
 
 # [STUDY]
 #   1. StandardScaler한 input 데이터의 평균과 y의 평균을 구한다.
@@ -60,13 +116,8 @@ train = optimizer.minimize(cost)  # cost를 최소화하는 방향으로 train
 
 init = tf.compat.v1.global_variables_initializer()
 
-
 # [STUDY] 1은 row major order를 의미한다.
 #    0은 column major order를 의미한다.
-
-# 자연상수 e와 로그에 대한 공부
-# 그리고 gradient descent를 tensorflow를 이용하지 않고 sklearn을 이용하여 구현해보자
-
 
 
 # cost = tf.reduce_mean()
