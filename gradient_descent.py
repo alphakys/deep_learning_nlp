@@ -35,9 +35,18 @@ X2 = raw_df['LSTAT']
 y = raw_df['PRICE'].values.reshape(-1, 1)
 
 ss = StandardScaler()
+standard_fit_input = ss.fit_transform(X=raw_df[['RM', 'LSTAT']])
 
-st_X1: ndarray = ss.fit_transform(X=X1.values.reshape(-1, 1))
-st_X2: ndarray = ss.fit_transform(X=X2.values.reshape(-1, 1))
+
+
+# st_X1: ndarray = ss.fit_transform(X=X1.values.reshape(-1, 1))
+# st_X2: ndarray = ss.fit_transform(X=X2.values.reshape(-1, 1))
+
+
+
+
+
+exit()
 
 # [STUDY]
 #   (pred-true)**2 -> bias
@@ -45,45 +54,60 @@ st_X2: ndarray = ss.fit_transform(X=X2.values.reshape(-1, 1))
 # 예측값과 (예측값들의 평균)의 차이가 얼마인지를 그리고 그 차이가 클수록 에러가 높다.
 # irreducible error는 줄일 수 없는 에
 
+# [STUDY] theta is weight
+#   alpha is learning rate
 
-# The data to fit
-m = 20
-theta1_true = 0.5
-x = np.linspace(-1, 1, m)
-y = theta1_true * x
-
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6.15))
-ax[0].scatter(x, y, marker='x', s=40, color='k')
-
-def cost_func(theta1):
-    theta1 = np.atleast_2d(np.array(theta1))
-
-    # [STUDY] 1차원과 2차원의 array를 얼마든지 행렬 계산 할 수 있다.
-    #   굳이 1차원을 2차원으로 만들 필요가 없다.
-    #   대신 1차원으로 값이 반환된다. 그리고 행렬 계산을 위한 행/렬의 개수는 맞아야 함
-    # hypothesis.shape(50,20)
-    # y.shape(20,)
-    # 그래서 반환되는 값을 shape(50,20)을 row major order로 평균을 낸 값이 반횐됨
-
-    # hypothesis(x, theta1) 이 값은 결국 x를 50세트를 만드는
-    print(np.average((y - hypothesis(x, theta1)) ** 2, axis=1))
-    print(np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2)
-    return np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2
-    #return np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2
+# gradient_descent() 함수에서 반복적으로 호출되면서 update될 weight/bias 값을 계산하는 함수
+# rm은 방개수, lstat은 하위계층 비율, target은 집값 PRICE. 전체 array가 입력됨
+# 반환 값은 weight와 bias가 update 되어야 할 값과 Mean Squared Error 값을 loss로 반환
 
 
-def hypothesis(x, theta1):
-    # our hypothesis function, a straight line through the origin
-    return theta1 * x
+#Loss(w)는 MSE이고 Loss(w) = 시그마 i=1 ~ N (yi − w0 + w1 ∗ xi )**2
 
-# theta1_grid가 x값
-theta1_grid = np.linspace(-0.2, 1, 50)
+# w1,new = w1,old - n(learning rate) *
+def get_update_weights_values(bias, w1, w2, rm, lstat, target, learning_rate):
+    N = len(y)
 
-#print(x)
+    # prd는 예측값 고로 weight1(theta1) * feature의 값(x1) // weight2(theta2) * feature의 값(x2)를 더한 값에 bias를 더한 값이다.
+    prd = w1 * rm + w2 * lstat + bias
+    # diff는 예측값과 PRICE 실제값의 차이이다.
+    diff = (target - prd)
+    bias_factor = np.ones((N,))
 
-J_grid = cost_func(theta1_grid.reshape(-1, 1))
+    w1_update = -(2/N) * learning_rate * (np.dot(rm.T, diff ))
+    w2_update = -(2 / N) * learning_rate * (np.dot(lstat.T, diff))
+    bias_update = -(2/N) * learning_rate * (np.dot(bias_factor.T, diff) )
 
-J_grid = cost_func(theta1_grid)
+    mse_loss = np.mean(np.square(diff))
+
+    return bias_update, w1_update, w2_update, mse_loss
+
+# rm, lstat feature array와 price target array를 입력 받아서 iter_epoch 수만큼 반복적으로 weight와 bias를 update하는 함수
+def gradient_descent(features, target, iter_epochs=1000, verbose=True):
+    # w1, w2는 numpy array 연산을 위해 1차원 array로 변환하되 초기 값은 0으로 설정
+    # bias도 1차원 array로 변환하되 초기 값은 1로 설정
+    w1 = np.zeros((1,))
+    w2 = np.zeros((1,))
+    bias = np.ones((1,))
+    print('최초 w1, w2, bias 값: ', w1, w2, bias)
+
+    # learning rate는 rm, lstat 피처 지정. 호출 시 numpy array 형태로 rm과  lstat으로 된 2차원 feature가 입력됨
+    learning_rate = 0.01
+    rm = features[:, 0]
+    lstat = features[:, 1]
+
+
+
+
+gradient_descent()
+
+
+
+
+
+
+
+print(get_update_weights_values(0, 0, 0, st_X1, st_X2, y, 0.01))
 
 
 
