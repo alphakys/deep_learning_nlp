@@ -1,14 +1,13 @@
-import math
 import os
-import random
-import time
-from decimal import Decimal
 import numpy as np
-
 import pandas as pd
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
+
+from keras.layers import Dense
+from keras.models import Sequential
+from keras.optimizers import Adam
 
 from numpy import ndarray
 from pandas import Series
@@ -19,99 +18,112 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error as mse
+from sklearn.datasets import load_diabetes
 
 import matplotlib
-matplotlib.use('TkAgg')
+
+# matplotlib.use('TkAgg')
 
 
 raw_df = pd.read_csv("boston.csv")
-X1 = raw_df['RM']
-X2 = raw_df['LSTAT']
-
-# 생각해보자 price라고 하는 것은 결국 13개의 (혹은 더 많은 parameter가 있을 수 있겠지) feature에 의해서 도출된 결과값이다.
-# 그리고 내가 지금까지 한 것은 한 feature에 대한 prediction을 수행한 것이었다.
-# 여러 개의 feature에 대한 prediction을 수행할 수도 있었겠지
-
-y = raw_df['PRICE'].values.reshape(-1, 1)
 
 ss = StandardScaler()
 standard_fit_input = ss.fit_transform(X=raw_df[['RM', 'LSTAT']])
+y = raw_df['PRICE'].values
 
 
-
-# st_X1: ndarray = ss.fit_transform(X=X1.values.reshape(-1, 1))
-# st_X2: ndarray = ss.fit_transform(X=X2.values.reshape(-1, 1))
-
-
-
+# weight와 bias 값을 조정하면서 최적의 cost(loss)를 찾아가는 것이다.
+# 이 과정에서 weight의 update가 일어나는데 편미분을 이용하여 weight의 변화율(기울기)를 구하고
+# 기울기의 양수, 음수에 따라서 그 weight 값을 증가시키거나 감소시키는 것이다.
+# 기울기와 반대로 weight를 조정하는 것이기 때문에 w_new = w_old - learning_rate * gradient이다.
 
 
-exit()
+# [STUDY] 중요!! weight update 공식
+#  w_new = w_old - (-2 * (target - prediction) * x)
+#  bias_new = bias_old - (-2 * (target - prediction) * 1)
+def get_update_weights_value(bias, w1, w2, rm, lstat, target, learning_rate=0.01):
+    # 데이터 건수
+    N = len(target)
+    # 예측 값.
+    predicted = w1 * rm + w2 * lstat + bias
+    # 실제값과 예측값의 차이
+    diff = target - predicted
+    # bias 를 array 기반으로 구하기 위해서 설정.
+    bias_factors = np.ones((N,))
 
-# [STUDY]
-#   (pred-true)**2 -> bias
-#   (pred-pred_average)**2 -> variance(분산)
-# 예측값과 (예측값들의 평균)의 차이가 얼마인지를 그리고 그 차이가 클수록 에러가 높다.
-# irreducible error는 줄일 수 없는 에
-
-# [STUDY] theta is weight
-#   alpha is learning rate
-
-# gradient_descent() 함수에서 반복적으로 호출되면서 update될 weight/bias 값을 계산하는 함수
-# rm은 방개수, lstat은 하위계층 비율, target은 집값 PRICE. 전체 array가 입력됨
-# 반환 값은 weight와 bias가 update 되어야 할 값과 Mean Squared Error 값을 loss로 반환
-
-
-#Loss(w)는 MSE이고 Loss(w) = 시그마 i=1 ~ N (yi − w0 + w1 ∗ xi )**2
-
-# w1,new = w1,old - n(learning rate) *
-def get_update_weights_values(bias, w1, w2, rm, lstat, target, learning_rate):
-    N = len(y)
-
-    # prd는 예측값 고로 weight1(theta1) * feature의 값(x1) // weight2(theta2) * feature의 값(x2)를 더한 값에 bias를 더한 값이다.
-    prd = w1 * rm + w2 * lstat + bias
-    # diff는 예측값과 PRICE 실제값의 차이이다.
-    diff = (target - prd)
-    bias_factor = np.ones((N,))
-
-    w1_update = -(2/N) * learning_rate * (np.dot(rm.T, diff ))
+    # weight와 bias를 얼마나 update할 것인지를 계산.
+    w1_update = -(2 / N) * learning_rate * (np.dot(rm.T, diff))
     w2_update = -(2 / N) * learning_rate * (np.dot(lstat.T, diff))
-    bias_update = -(2/N) * learning_rate * (np.dot(bias_factor.T, diff) )
+    bias_update = -(2 / N) * learning_rate * (np.dot(bias_factors.T, diff))
 
+    # Mean Squared Error값을 계산.
     mse_loss = np.mean(np.square(diff))
 
+    # weight와 bias가 update되어야 할 값과 Mean Squared Error 값을 반환.
     return bias_update, w1_update, w2_update, mse_loss
 
-# rm, lstat feature array와 price target array를 입력 받아서 iter_epoch 수만큼 반복적으로 weight와 bias를 update하는 함수
+
 def gradient_descent(features, target, iter_epochs=1000, verbose=True):
     # w1, w2는 numpy array 연산을 위해 1차원 array로 변환하되 초기 값은 0으로 설정
-    # bias도 1차원 array로 변환하되 초기 값은 1로 설정
+    # bias도 1차원 array로 변환하되 초기 값은 1로 설정.
     w1 = np.zeros((1,))
     w2 = np.zeros((1,))
-    bias = np.ones((1,))
-    print('최초 w1, w2, bias 값: ', w1, w2, bias)
+    bias = np.zeros((1,))
+    print('최초 w1, w2, bias:', w1, w2, bias)
 
-    # learning rate는 rm, lstat 피처 지정. 호출 시 numpy array 형태로 rm과  lstat으로 된 2차원 feature가 입력됨
+    # learning_rate와 RM, LSTAT 피처 지정. 호출 시 numpy array형태로 RM과 LSTAT으로 된 2차원 feature가 입력됨.
     learning_rate = 0.01
     rm = features[:, 0]
     lstat = features[:, 1]
 
+    # iter_epochs 수만큼 반복하면서 weight와 bias update 수행.
+    for i in range(iter_epochs):
+        # weight/bias update 값 계산
+        bias_update, w1_update, w2_update, loss = get_update_weights_value(bias, w1, w2, rm, lstat, target,
+                                                                           learning_rate)
+        # weight/bias의 update 적용.
+        w1 = w1 - w1_update
+        w2 = w2 - w2_update
+        bias = bias - bias_update
+        if verbose:
+            print('Epoch:', i + 1, '/', iter_epochs)
+            print('w1:', w1, 'w2:', w2, 'bias:', bias, 'loss:', loss)
+
+    return w1, w2, bias
 
 
+scaler = MinMaxScaler()
+# pandas loc를 이용하여 exclude 가능
+scaled_features = scaler.fit_transform(raw_df.loc[:, raw_df.columns != 'PRICE'])
 
-gradient_descent()
+# [STUDY] slicing시 행렬에 맞게 출력됨
+# print(raw_df[:509])
+# 5행, 3열까지 // 13열까지 있음
+# print(raw_df.iloc[:5,0])
 
+model = Sequential([
+    # 단 하나의 units 설정, input shape는 2차원, 회귀이므로 activation은 설정하지 않음
+    # weight와 bias 초기화는 kernel_inbitializer와 bias_initializer로 설정
+    # 케라스에서는 shape(행, 렬)이 반대인 듯하다.
+    Dense(units=1, input_shape=(13,), kernel_initializer='zeros', bias_initializer='ones'),
+])
 
+# Adam optimizer를 이용하여 loss 함수는 Mean squared error, 성능 측정 역시 MSE를 이용하여 학습 수행
+model.compile(optimizer=Adam(learning_rate=0.01), loss='mse', metrics=['mse'])
+model.fit(scaled_features, y, epochs=1000)
 
-
-
-
-
-print(get_update_weights_values(0, 0, 0, st_X1, st_X2, y, 0.01))
-
-
+keras_prd = model.predict(scaled_features)
+raw_df['keras_prd'] = keras_prd
+print(raw_df.head(15))
+print()
 
 exit()
+
+scaled_features = standard_fit_input
+w1, w2, bias = gradient_descent(scaled_features, y, iter_epochs=5000, verbose=False)
+
+predicted = w1 * scaled_features[:, 0] + w2 * scaled_features[:, 1] + bias
+
 
 # [STUDY]
 #   1. StandardScaler한 input 데이터의 평균과 y의 평균을 구한다.
@@ -120,188 +132,21 @@ exit()
 
 # [STUDY]
 #   uniform안의 배열이 shape을 의미하는 듯하다.[3,3]
-# weight
-W = tf.Variable(tf.random.uniform([1], 0, 1.0))
-# bias
-b = tf.Variable(tf.random.uniform([1], 0, 1.0))
 
-X = st_X1
-
-H = W * X + b
-cost = tf.reduce_mean(tf.square(H - y))
-
-# 한 번에 얼마만큼 점프하는지 -> learning rate를 의미하는 듯
-learning_rate = tf.Variable(0.01)
-
-print(tf.GradientTape.gradient(3, 1))
-
-optimizer = tf.compat.v1.train.GradientDescentOptimizer(learning_rate=learning_rate)
-train = optimizer.minimize(cost)  # cost를 최소화하는 방향으로 train
-
-init = tf.compat.v1.global_variables_initializer()
 
 # [STUDY] 1은 row major order를 의미한다.
 #    0은 column major order를 의미한다.
 
 
-# cost = tf.reduce_mean()
-# X = tf.p(tf.float32, shape=[None])
-
-
-exit()
-
-
-# print(residual_multiple_sum / residual_x_square.sum())
-def ordinary_least_square(x: ndarray, y: ndarray):
-    pass
-    # residual_x = st_X1 - x_mean
-    # residual_y = y - y_mean
-    #
-    # residual_multiple_sum = (residual_x * residual_y).sum()
-    #
-    # residual_x_square = residual_x ** 2
-    #
-    # ols_raw_list = (residual_x * residual_y) / residual_x_square
-    # return np.sum(x*y)/np.sum(x*x)
-
-
-# print((residual_x * residual_y)[:5])
-
-exit()
-
-lr1 = LinearRegression()
-lr1.fit(st_X1, y)
-lr1.predict(st_X1)
-
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6.15))
-
-ax[0].scatter(st_X1, y, c='blue', marker='o', label='true')
-ax[1].scatter(st_X1, lr1.predict(st_X1), c='k', marker='x', label='error')
-
-fig.show()
-
-exit()
-
-lr1 = LinearRegression()
-lr2 = LinearRegression()
-# 이것은 결국 방개수에 대한 price를 예측하기 위한 그래프 즉 coefficient와 intercept를 구하기 위한 코드
-lr1.fit(st_X1, y)
-lr2.fit(st_X2, y)
-# fit(coefficient, intercept)를 통해서 구해질 예측값
-
-
-# ** 예측값들의 array **
-prd_X1 = lr1.predict(st_X1)
-prd_X2 = lr2.predict(st_X2)
-# ** 실제값들의 array **
-y_true = y.values
-
-# m = 20
-# # 가중치 인듯 정확하진 않음
-# theta1_true = 0.5
-# # x input data
-# x = np.linspace(-1, 1, m)
-# # true_y value
-# y = theta1_true * x
-
-# The plot: LHS is the data, RHS will be the cost function.
 # [STUDY] 여러 개의 graph 축 공유
 #   nrows 행으로 몇개의 그래프를 그릴 것인지, ncols 열로 몇개의 그래프를 그릴 것인지, fifsize는 그래프의 크기
 #   var1, var2 하면 initialize하는 value가 array이면 0-index = var1, 1-index = var2
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6.15))
-ax[0].scatter(st_X1, y, marker='x', s=30, color='k', label='Training data')
 
-
-def cost_func(theta1):
-    """The cost function, J(theta1) describing the goodness of fit."""
-    theta1 = np.atleast_2d(np.asarray(theta1))
-    return np.average((y - hypothesis(x, theta1)) ** 2, axis=1) / 2
-
-
-def hypothesis(x, theta1):
-    """Our "hypothesis function", a straight line through the origin."""
-    return theta1 * x
-
-
-# First construct a grid of theta1 parameter pairs and their corresponding
-# cost function values.
-theta1_grid = np.linspace(-0.2, 1, 50)
-J_grid = cost_func(theta1_grid[:, np.newaxis])
-
-# [STUDY] arr[:, np.newaxis]는 arr을 2차원으로 만들어준다. 즉 1차원은 2차원으로 / 2차원은 3차원으로 한 축을 늘려준다.
-# The cost function as a function of its single parameter, theta1.
-ax[1].plot(theta1_grid, J_grid, 'k')
-
-print(J_grid)
-# plt.show()
-
-exit()
-
-# Take N steps with learning rate alpha down the steepest gradient,
-# starting at theta1 = 0.
-N = 5
-alpha = 1
-theta1 = [0]
-J = [cost_func(theta1[0])[0]]
-for j in range(N - 1):
-    last_theta1 = theta1[-1]
-    this_theta1 = last_theta1 - alpha / m * np.sum(
-        (hypothesis(x, last_theta1) - y) * x)
-    theta1.append(this_theta1)
-    J.append(cost_func(this_theta1))
-
-# Annotate the cost function plot with coloured points indicating the
-# parameters chosen and red arrows indicating the steps down the gradient.
-# Also plot the fit function on the LHS data plot in a matching colour.
-colors = ['b', 'g', 'm', 'c', 'orange']
-ax[0].plot(x, hypothesis(x, theta1[0]), color=colors[0], lw=2,
-           label=r'$\theta_1 = {:.3f}$'.format(theta1[0]))
-for j in range(1, N):
-    ax[1].annotate('', xy=(theta1[j], J[j]), xytext=(theta1[j - 1], J[j - 1]),
-                   arrowprops={'arrowstyle': '->', 'color': 'r', 'lw': 1},
-                   va='center', ha='center')
-    ax[0].plot(x, hypothesis(x, theta1[j]), color=colors[j], lw=2,
-               label=r'$\theta_1 = {:.3f}$'.format(theta1[j]))
-
-# Labels, titles and a legend.
-ax[1].scatter(theta1, J, c=colors, s=40, lw=0)
-ax[1].set_xlim(-0.2, 1)
-ax[1].set_xlabel(r'$\theta_1$')
-ax[1].set_ylabel(r'$J(\theta_1)$')
-ax[1].set_title('Cost function')
-ax[0].set_xlabel(r'$x$')
-ax[0].set_ylabel(r'$y$')
-ax[0].set_title('Data and fit')
-ax[0].legend(loc='upper left', fontsize='small')
-
-plt.tight_layout()
-plt.show()
-
-exit()
-
-a = np.linspace(1, 10, num=10)
-
-print(a)
-exit()
-print("mse : ", mse(y_true, prd_X1, multioutput='raw_values'))
-
-exit()
 
 # [STUDY] lr.score() 결정계수라고 하며
 #   예측한 값과 TRUE 값의 차이가 얼마나 적냐 즉 정확도가 얼마나 높냐를 나타내는 지표이다.
 #   0~ 1 사이의 값을 가지며 1에 가까울수록 정확도가 높다.
-print('x1 score : ', lr1.score(st_X1, y_true))
-print('x2 score : ', lr2.score(st_X2, y_true))
 
-# 기존 데이터를 바탕으로 도출된 그래프
-# plt.plot(X1, y, 'o')
-# 내가 학습시킨(coefficient, intercept)를 구한 모델을 바탕으로 그려진 그래프
-plt.plot(st_X1, lr1.predict(st_X1), color='black')
-plt.plot(st_X2, lr2.predict(st_X2), color='blue')
-
-plt.show()
-
-exit()
 
 # [STUDY]
 #   line_fitter.coef는 기울기를 의미한다.
@@ -311,47 +156,14 @@ exit()
 # [STUDY] ROW MAJOR ORDER -> ------->
 #  COLUMN MAJOR ORDER -> ||||||||||
 
-raw_df = pd.read_csv("boston.csv")
-X1 = raw_df['RM']
-X2 = raw_df['LSTAT']
-y = raw_df['PRICE']
-
-multi_dataframe = raw_df[[
-    'CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT']]
-
 # [STUDY]
 #  scaling
 #  MinMaxScaler란 데이터의 최대값과 최소값을 바탕으로 모든 데이터를 0에서 1사이의 값으로 환산하는 것을 의미한다.
 
-ms = MinMaxScaler()
-two_feature_dataframe = raw_df[['RM', 'LSTAT']]
-
-plt.scatter(two_feature_dataframe['RM'].values, two_feature_dataframe['LSTAT'].values, alpha=0.4)
-
-plt.show()
-
-exit()
 # [STUDY]
 #  dataframe.values를 사용하여 데이터만 전달되도록 한다.
-x_train, x_test, y_train, y_test = train_test_split(ms_fit_X, y, train_size=0.85, test_size=0.15)
 
-mlr = LinearRegression()
-mlr.fit(x_train, y_train)
 
-score = mlr.score(x_train, y_train)
-print(score)
-
-# linear regressoin에 train 데이터를 학습한 모델을 바탕으로 test 데이터를 예측한 값
-y_predict = mlr.predict(x_test)
-
-# linear regressoin에 train 데이터를 학습한 모델을 바탕으로 test 데이터를 예측한 값
-# y_test는 실제 방값
-plt.scatter(y_test, y_predict, alpha=0.4)
-plt.xlabel("Actual Price")
-plt.ylabel("Predicted Price")
-plt.show()
-
-exit()
 # [STUDY]
 #  용어정리
 #  * NORMALIZATION / scikit-learn에서 MinMaxScaler를 사용하면 0과 1사이의 값으로 변환해준다.
@@ -375,44 +187,6 @@ exit()
 #   scale_X2 = ms.fit_transform(X2.values.reshape(-1, 1))
 
 
-ms = MinMaxScaler()
-scale_X1 = ms.fit_transform(X1.values.reshape(-1, 1))
-scale_X2 = ms.fit_transform(X2.values.reshape(-1, 1))
-
-lr = LinearRegression()
-line_fitter = lr.fit(scale_X1, y)
-
-plt.plot(scale_X1, y, 'o')
-plt.plot(scale_X1, lr.predict(scale_X1), color='red')
-
-plt.show()
-
-# print(scale_X)
-
-# plt.plot(X, y, 'o')
-# plt.plot(X, line_fitter.predict(X.values.reshape(-1, 1)), color='red')
-
-
-exit()
-
-ssc = StandardScaler()
-
-x_reshape = X.values.reshape(-1, 1)
-
-fit_x = ssc.fit(x_reshape)
-
-X_std = ssc.fit_transform(x_reshape)
-
-print(X_std)
-
-exit()
-
-# StandardScaler().fit_transform(X)
-
-
-exit()
-line_fitter = LinearRegression()
-
 # [STUDY]
 #  1. reshape(a,b) a는 차원을 말함 // b는 a차원의 원소의 개수를 말함
 #  x.values.reshape(1, -1)
@@ -420,54 +194,11 @@ line_fitter = LinearRegression()
 #  여기서 주의해야 할 점은 X데이터를 넣을 때 .values.reshape(-1,1)를 해줬다는 거다. 왜냐하면 X는 2차원 array 형태여야 하기 때문이다.
 #  이런 식으로 [[x1], [x2], [x3], ... , [xn]] . (이렇게 넣는 이유는 X 변수가 하나가 아니라 여러개일 때 다중회귀분석을 실시하기 위함인데,
 #  이는 다른 포스팅에서 소개한다.)
-linear_line = line_fitter.fit(X.values.reshape(-1, 1), y)
-
-print(linear_line.predict([[20]]))
-
-print(linear_line.intercept_)
-
-plt.plot(X, y, 'o')
-plt.plot(X, line_fitter.predict(X.values.reshape(-1, 1)), color='red')
-
-plt.show()
-
-exit()
-raw_df = pd.read_csv("boston.csv")
-
-# [STUDY]
-#  6.3200e-03 -> 부동소수점으로 e-03은 10의 -3승을 의미한다.
-print(raw_df)
-
-exit()
-
-
-# gradient descent() 함수에서 반복적으로 호출되면서 update될 weight/bias값을 계산하는 함수
-# rm은 RM(방 개수), lstat(하위계층 비율), target은 price임. 전체 array가 다 입력됨.
-# 반환 값은 weight와 bias가 update되어야 할 값과 mean squared error 값을 loss로 반환.
-def get_update_weights_values(bias, w1, w2, rm, lstat, target, learning_rate):
-    N = len(target)
-    predicted = w1 * rm + w2 * lstat + bias
-    diff = target - predicted
 
 
 # [STUDY]
 #  1. df.index는 raw의 개수
 #  2. df[key]는 key에 해당하는 column을 가져온다.
-#  3.
-# print(raw_df.index)
-
-
-# 5  12
-
-
-exit()
-
-data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
-target = raw_df.values[1::2, 2]
-
-print(target)
-
-exit()
 
 
 def create_boston_dataset():
