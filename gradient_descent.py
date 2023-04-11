@@ -48,6 +48,7 @@ def get_update_weights_value(bias, w1, w2, rm, lstat, target, learning_rate=0.01
     predicted = w1 * rm + w2 * lstat + bias
     # 실제값과 예측값의 차이
     diff = target - predicted
+
     # bias 를 array 기반으로 구하기 위해서 설정.
     bias_factors = np.ones((N,))
 
@@ -94,7 +95,10 @@ def gradient_descent(features, target, iter_epochs=1000, verbose=True):
 
 scaler = MinMaxScaler()
 # pandas loc를 이용하여 exclude 가능
-scaled_features = scaler.fit_transform(raw_df.loc[:, raw_df.columns != 'PRICE'])
+# scaled_features = scaler.fit_transform(raw_df.loc[:, raw_df.columns != 'PRICE'])
+scaled_features = scaler.fit_transform(raw_df[['RM', 'LSTAT']])
+gradient_descent(scaled_features, y, verbose=True)
+
 
 # [STUDY] slicing시 행렬에 맞게 출력됨
 # print(raw_df[:509])
@@ -201,32 +205,38 @@ predicted = w1 * scaled_features[:, 0] + w2 * scaled_features[:, 1] + bias
 #  2. df[key]는 key에 해당하는 column을 가져온다.
 
 
-def create_boston_dataset():
-    # [STUDY]
-    #  boston housing dataset csv 새로 생성
-    data_url = "http://lib.stat.cmu.edu/datasets/boston"
-    raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
 
-    # [STUDY]
-    #  1. l[:3]은 0,1,2번째( X < 3 ) index를 가져온다.
-    #  2. l[x:y]는 x <= index < y를 가져온다.
-    #  3. l[x:y:z]는 x <= index < y를 z만큼 건너뛰면서 가져온다.
-    #  4. iloc는 (index) location을 의미하는 듯 -> 따라서 row(index)에 해당하는 한 / [가로줄]을 가져온다.
-    #  5. df.iloc[:, 0]은 df의 첫번째 column의 열을 가져온다. / [세로줄]
-    #  6. [] slicing에 , 뒤로는 열[column, 세로줄] // 앞으로는 행[row, 가로줄]을 의미한다.
-    #  7.
+ss = StandardScaler()
+scaled_features = ss.fit_transform(raw_df[['RM', 'LSTAT']])
+print(scaled_features)
+exit()
 
-    end = len(raw_df.columns)
-    end_row = raw_df.index.stop
 
-    ins_series: Series = raw_df.iloc[1::2, 0:end_row]
-    ins_series.reset_index(inplace=True, drop=True)
+def get_update_weight_values():
+    pass
 
-    raw_df.drop(index=range(0, end_row)[1::2], axis=0, inplace=True)
-    raw_df.reset_index(inplace=True, drop=True)
 
-    for i in range(end, end + 3):
-        raw_df[i] = ins_series[i - 11]
 
-    raw_df.columns = ["CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PTRATIO", "B", "LSTAT",
-                      "PRICE"]
+def gradient_descent(scaled_features, target, verbose=False, iter_epochs=1000):
+
+    learning_rate = 0.01
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
