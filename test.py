@@ -1,13 +1,31 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-black_pix = [[0], [1], [0], [1]]
+from sklearn.cluster import KMeans
+import pandas as pd
+from pandas import DataFrame
 
-for b in black_pix:
-    print(id(b))
+df = pd.read_csv('ronfic_u_xim.csv')
+df: DataFrame = df.loc[:, df.columns != '#']
 
+model = KMeans(n_clusters=2, algorithm='auto')
+model.fit(df)
+
+df['prediction'] = model.predict(df)
+
+# print(df[['users_id', 'prediction']].to_csv('result.csv'))
+
+
+# print(df.groupby(by=['users_id', 'prediction']).count())
 
 exit()
+
+plt.scatter(df['R_avr_force'], df['weight_value'], c=df['prediction'], alpha=0.5)
+
+plt.show()
+
+exit()
+
 # [STUDY]
 #  C order란 ROW MAJOR ORDER를 의미한다.
 #  F order란 COLUMN MAJOR ORDER를 의미한다.
