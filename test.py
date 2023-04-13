@@ -5,6 +5,24 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
 
+
+
+a = np.array([
+              [[1,1,1],
+              [2,2,2],
+              [3,3,3]],
+
+              [[1,1,1],
+              [2,2,2],
+              [3,3,3]],
+
+              [[1,1,1],
+              [2,2,2],
+              [3,3,3]]
+             ])
+
+exit()
+
 df = pd.read_csv('ronfic_u_xim.csv')
 df: DataFrame = df.loc[:, df.columns != '#']
 
