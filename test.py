@@ -22,6 +22,8 @@ exit()
 
 plt.scatter(df['R_avr_force'], df['weight_value'], c=df['prediction'], alpha=0.5)
 
+
+# 로짓함수 시그모이드 함수에 대한 전반적인 이해를 위한 수학공부!
 plt.show()
 
 exit()
