@@ -1,67 +1,31 @@
 import numpy as np
+
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
 
 
+num = np.array(np.arange(100))
 
-a = [i for i in range(-20, 21)]
+t = np.ones((100, 100))
 
-
-y = [2**j for j in a]
+a = np.full((100,100), 255)
 print(a)
 
-# 홀수 함수는 시그모이드 형태
-# 짝수 함수는 밥솥 형태
-plt.plot(a,y, color='red')
+cmap = cm.get_cmap('gray')
+plt.imshow(t, cmap=cmap)
+
+plt.imshow(a)
 plt.show()
-exit()
-
-a = np.array([
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]],
-
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]],
-
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]]
-             ])
 
 
 
-a = np.array([
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]],
 
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]],
 
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]]
-             ])
 
-a = np.array([
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]],
-
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]],
-
-              [[1,1,1],
-              [2,2,2],
-              [3,3,3]]
-             ])
 exit()
 
 df = pd.read_csv('ronfic_u_xim.csv')
@@ -76,6 +40,8 @@ df['prediction'] = model.predict(df)
 
 
 # print(df.groupby(by=['users_id', 'prediction']).count())
+
+plt.plot()
 
 exit()
 
