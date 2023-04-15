@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
 
-
+from konlpy
 num = np.array(np.arange(100))
 
 t = np.ones((100, 100))
@@ -15,8 +15,6 @@ t = np.ones((100, 100))
 a = np.full((100,100), 255)
 print(a)
 
-cmap = cm.get_cmap('gray')
-plt.imshow(t, cmap=cmap)
 
 plt.imshow(a)
 plt.show()
