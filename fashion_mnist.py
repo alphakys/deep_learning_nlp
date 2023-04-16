@@ -1,22 +1,19 @@
-import os
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
-import numpy as np
+ import numpy as np
 
 from keras.datasets import fashion_mnist
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
-
 from keras.optimizers import Adam
-from keras.losses import CategoricalCrossentropy
-from keras.metrics import Accuracy
+from keras.utils import to_categorical
+
+from sklearn.model_selection import train_test_split
 
 from matplotlib import pyplot as plt
 
 (train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
 
 class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
 
 def show_images(images, labels, ncols=8):
     fig, ax = plt.subplots(nrows=1, ncols=ncols, figsize=(22, 6))
@@ -32,11 +29,22 @@ def get_preprocessed_data(images, labels):
     # 그러면 왜 0 ~ 1 사이의 값으로 전처리 해주는걸까?
     # [STUDY] np.array에서 object-like라고 매개변수를 넣을 수 있다고 되어있는데
     #   numpy가 리스트 전체를 한 번에 처리할 수 있는 듯하다.
-    processed_img = np.array(object=(images / 255.0), dtype=np.float32)
-    labels = np.array(labels, dtype=np.int32)
+    processed_img = np.array(object=images / 255.0, dtype=np.float32)
+    labels = np.array(labels, dtype=np.float32)
     return processed_img, labels
 
+
 train_images, train_labels = get_preprocessed_data(train_images, train_labels)
+test_images, test_labels = get_preprocessed_data(test_images, test_labels)
+# [STUDY] train_test_split(feature_dataset, target_dataset, random_state는 random seed를 의미한다.)
+tr_images, val_images, tr_labels, val_labels = train_test_split(train_images, train_labels, test_size=0.15,
+                                                                random_state=2021)
+
+# to_categorical은 one-hot encoding을 해주는 함수이다.
+# 결국 우리가 ascii 코드는 알파벳읇 비롯하여 특수문자들을 컴퓨터가 인식할 수 있는 숫자 코드로 변환해주는 코드표이듯이 e.g: a -> 97 b -> 98
+# label(string)을 숫자 코드표로 컴퓨터가 인식할 수 있는 형태로 바꿔주는 것이다.
+tr_oh_labels = to_categorical(tr_labels)
+val_oh_labels = to_categorical(val_labels)
 
 IMPUT_SIZE = 28
 model = Sequential([
@@ -58,29 +66,25 @@ model = Sequential([
 # metrics는 성능측정을 의미한다. 여기서는 accuracy를 사용한다.
 model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
-from keras.utils import to_categorical
+# validation data는 tuple로 넣어준다.
+history = model.fit(x=tr_images, y=tr_oh_labels, epochs=20, batch_size=128, validation_data=(val_images, val_oh_labels),
+                    verbose=1)
 
-# [STUDY] one-hot encoding은 column이 string으로 되어있는 것을 int로 구분할 수 있게 만드는 것이다.
-#   예를 들어 ['sun', 'moon', 'umbrella']가 있을 때, sun은 0, moon은 1, umbrella는 2로 인코딩한다.
-#   우리가 마치 ascii 코드표에서 a가 97이 듯이 마찬가지로 각 label을 숫자로 인코딩하는 것으로 이해된다.
-train_oh_labels = to_categorical(train_labels)
-test_oh_labels = to_categorical(test_labels)
-
-history = model.fit(x=train_images, y=train_oh_labels, epochs=20, batch_size=32, verbose=1)
-
-# predict할 때, 애초에 fit을 시킬 때, 3차원 데이터를 넣어서 fit 했기 때문에 predict하는 데이터도 3차원으로 매개변수에 넣어준다.
-# 이 때, 사용하는 함수가 expand_dims이다. axis는 0이면 차원, 1이면 행, 2이면 열이다.
-prd_proba = model.predict(np.expand_dims(test_images[0], axis=0))
-
-print("softmax output : ", prd_proba)
-
-# argmax는 가장 큰 값을 가진 index를 반환한다.
-pred = np.argmax(np.squeeze(prd_proba))
-
-# !! 테스트 데이터 세트로 모델 성능 검증
-model.evaluate(test_images, test_oh_labels, batch_size=64)
+print(history.history['loss'])
+print(history.history['accuracy'])
+print(history.history['val_loss'])
+print(history.history['val_accuracy'])
 
 
-
-
-
+#
+# # predict할 때, 애초에 fit을 시킬 때, 3차원 데이터를 넣어서 fit 했기 때문에 predict하는 데이터도 3차원으로 매개변수에 넣어준다.
+# # 이 때, 사용하는 함수가 expand_dims이다. axis는 0이면 차원, 1이면 행, 2이면 열이다.
+# prd_proba = model.predict(np.expand_dims(test_images[0], axis=0))
+#
+# print("softmax output : ", prd_proba)
+#
+# # argmax는 가장 큰 값을 가진 index를 반환한다.
+# pred = np.argmax(np.squeeze(prd_proba))
+#
+# # !! 테스트 데이터 세트로 모델 성능 검증
+# model.evaluate(test_images, test_oh_labels, batch_size=64)
