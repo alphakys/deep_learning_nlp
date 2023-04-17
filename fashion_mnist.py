@@ -1,4 +1,4 @@
- import numpy as np
+import numpy as np
 
 from keras.datasets import fashion_mnist
 from keras.layers import Dense, Flatten
@@ -65,6 +65,10 @@ model = Sequential([
 # loss(손실함수, 목적함수, 비용함수)는 CategoricalCrossentropy를 사용한다.
 # metrics는 성능측정을 의미한다. 여기서는 accuracy를 사용한다.
 model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+
+model.summary()
+
 
 # validation data는 tuple로 넣어준다.
 history = model.fit(x=tr_images, y=tr_oh_labels, epochs=20, batch_size=128, validation_data=(val_images, val_oh_labels),
