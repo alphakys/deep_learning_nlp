@@ -7,46 +7,46 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
 
-num = np.array(np.arange(100))
+# 목표 데이터의 shape
+# object_shape
 
-t = np.ones((100, 100))
+# 목표 shape
+# target_shape
 
-a = np.full((100,100), 255)
-print(a)
-
-
-plt.imshow(a)
-plt.show()
+# filter shape
+# filter_shape
 
 
+# [STUDY] 1차원일 때, 왼쪽 2개, 오른쪽 3개로 padding을 할 것이다.
+#   2차원일 때, 행으로 x개, 열로 y개로 padding을 할 것이다.
+a = [1,2,3,4,5]
+np.pad(a, pad_width=(3,3))
+
+
+# 얼마만큼 padding을 할 것인가??
 
 
 
 
-exit()
-
-df = pd.read_csv('ronfic_u_xim.csv')
-df: DataFrame = df.loc[:, df.columns != '#']
-
-model = KMeans(n_clusters=2, algorithm='auto')
-model.fit(df)
-
-df['prediction'] = model.predict(df)
-
-# print(df[['users_id', 'prediction']].to_csv('result.csv'))
 
 
-# print(df.groupby(by=['users_id', 'prediction']).count())
-
-plt.plot()
-
-exit()
-
-plt.scatter(df['R_avr_force'], df['weight_value'], c=df['prediction'], alpha=0.5)
 
 
-# 로짓함수 시그모이드 함수에 대한 전반적인 이해를 위한 수학공부!
-plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+filter = np.arange(100)
+print(filter)
+np.full((4, 4))
 
 exit()
 
@@ -54,7 +54,6 @@ exit()
 #  C order란 ROW MAJOR ORDER를 의미한다.
 #  F order란 COLUMN MAJOR ORDER를 의미한다.
 n_arr = np.ndarray(shape=(10, 10), dtype=int, buffer=np.array(range(10)), order='C', offset=1)
-
 
 # [STUDY]
 #   결국에는 vectorization이란 cpu가 수행할 명령어 세트를 instructon이라고 하면 이 instruction을 수행할 데이터가

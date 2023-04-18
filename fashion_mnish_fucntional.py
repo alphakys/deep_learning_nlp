@@ -75,7 +75,7 @@ model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentrop
 
 mcp_cb = ModelCheckpoint(filepath='weights.{epoch:02d}-{val_loss: 2f}.hdf5', monitor='val_loss', save_best_only=True,
                          mode='min',
-                         period=5, verbose=1, save_weights_only=True, model='model.h5')
+                         period=5, verbose=1, save_weights_only=True)
 
 # [STUDY] ReduceLROnPlateau(monitor=‘val_loss’, factor=0.1, patience=10, verbose=0, mode=‘auto’, min_delta=0.0001, cooldown=0, min_lr=0)
 #   특정 epochs 횟수동안 성능이 개선 되지 않을 시 Learning rate를 동적으로 감소 시킴
