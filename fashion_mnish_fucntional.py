@@ -1,6 +1,7 @@
 import os
 
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
+from matplotlib import pyplot as plt
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -94,83 +95,15 @@ rlp_cb = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, mode='min
 
 est_cb = EarlyStopping(monitor='val_accuracy', mode='max', verbose=1, patience=4)
 history = model.fit(x=tr_images, y=tr_oh_labels, batch_size=50, validation_data=(val_images, val_oh_labels),
-                    callbacks=[mcp_cb, rlp_cb, est_cb],
-                    epochs=40)
+                    # callbacks=[rlp_cb, est_cb],
+                    epochs=30)
 
 
+def show_history(history):
+    plt.plot(history.history['accuracy'], label='train')
+    plt.plot(history.history['val_accuracy'], label='valid')
+    plt.legend()
+    plt.show()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-# # functoinal api practice
-# INPUT_SIZE = 28
-#
-# model = Sequential([
-#     Flatten(input_shape=(INPUT_SIZE, INPUT_SIZE)),
-#     Dense(100, activation='relu'),
-#     Dense(30, activation='relu'),
-#     Dense(10, activation='softmax')
-# ])
-#
-# model.summary()
-#
-# model1 = Sequential()
-# model1.add(Flatten(input_shape=(INPUT_SIZE, INPUT_SIZE)))
-# model1.add(Dense(100, activation='relu'))
-# model1.add(Dense(30, activation='relu'))
-# model1.add(Dense(10, activation='softmax'))
-#
-#
-# model1.summary()
-#
-# print('🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉')
-#
-# # functional api와 sequential 사이의 차이점은 input layer를 설정한다는 점이다.
-# input_tensor = Input(shape=(INPUT_SIZE, INPUT_SIZE))
-# # flatten에 생성인자는 init argument에 입력값은 call argument에 넣어준다.
-# x = Flatten()(input_tensor)
-# x = Dense(100, activation='relu', name='Dense1')(x)
-# x = Dense(30, activation='relu')(x)
-# output = Dense(10, activation='softmax')(x)
-#
-# model2 = Model(input_tensor, output)
-#
-# model2.summary()
-#
-# import tensorflow as tf
-#
-# class CustomDense(Layer):
-#     # 생성자에서 class 생성에 핵심적인 argument를 받는다.
-#     def __init__(self, units=32):
-#         # unit default는 32개
-#         super(CustomDense, self).__init__()
-#         self.units = units
-#
-#     def build(self, input_shape):
-#         self.w = self.add_weight(
-#             name='custom_practice',
-#             shape=(input_shape[-1], self.units),
-#             initializer='random_normal',
-#             trainable=True
-#         )
-#         self.b = self.add_weight(
-#             shape=(self.units,), initializer='random_normal', trainable=True
-#         )
-#
-#     # innstance가 생성된 후, call function에서 input argument를 받고 output을 return한다.
-#     def call(self, inputs):
-#         return tf.matmul(inputs, self.w) + self.b
+show_history(history)

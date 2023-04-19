@@ -17,6 +17,25 @@ from pandas import DataFrame
 # filter_shape
 
 
+# [STUDY] padding을 할 때, 몇 개의 padding을 할 것인가?를 위해 구하는 최종 행렬
+#   x = target_shape[0] -1 + filter_shape[0]
+
+x = (5,5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # [STUDY] 1차원일 때, 왼쪽 2개, 오른쪽 3개로 padding을 할 것이다.
 #   2차원일 때, 행으로 x개, 열로 y개로 padding을 할 것이다.
 a = [1,2,3,4,5]
@@ -25,35 +44,12 @@ np.pad(a, pad_width=(3,3))
 
 # 얼마만큼 padding을 할 것인가??
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-filter = np.arange(100)
-print(filter)
-np.full((4, 4))
-
 exit()
 
 # [STUDY]
 #  C order란 ROW MAJOR ORDER를 의미한다.
 #  F order란 COLUMN MAJOR ORDER를 의미한다.
-n_arr = np.ndarray(shape=(10, 10), dtype=int, buffer=np.array(range(10)), order='C', offset=1)
+# n_arr = np.ndarray(shape=(10, 10), dtype=int, buffer=np.array(range(10)), order='C', offset=1)
 
 # [STUDY]
 #   결국에는 vectorization이란 cpu가 수행할 명령어 세트를 instructon이라고 하면 이 instruction을 수행할 데이터가
