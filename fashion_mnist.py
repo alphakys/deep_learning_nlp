@@ -67,6 +67,9 @@ model = Sequential([
 model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
 
+# 텐서플로우 소스코드 빌드 작업
+# 회사 컴퓨터에서 했던 작업 반복
+
 model.summary()
 
 
