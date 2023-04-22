@@ -1,3 +1,7 @@
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.models import Model
 from keras.datasets import fashion_mnist
@@ -53,29 +57,34 @@ def create_model():
     #   batch까지 4차원을 받는데 input에서는 batch를 무시한다.
     input_tensor = Input(shape=(INPUT_SIZE, INPUT_SIZE, 1))
     # 결국 filter가 weight의 행렬임을 알자
+    # [STUDY] !!
+    #   결국 CONVOLUTION 연산은 INPUT과 FILTER의 DEPTH가 같아야 한다.!!!
     x = Conv2D(filters=32, kernel_size=(3, 3), strides=1, padding='same', activation='relu')(input_tensor)
-    print(type(x))
-    #x = Dropout(input_tensor)(x)
+    # x = Dropout(rate=0.5)(x)
+    x = Conv2D(filters=64, kernel_size=(3, 3), activation='relu')(x)
+    # [STUDY] 입력 데이터의 행 크기와 열 크기는 Pooling 사이즈의 배수(나누어 떨어지는 수)여야 합니다
+    #   Pooling 크기가 (2, 2) 라면 출력 데이터 크기는 입력 데이터의 행과 열 크기를 2로 나눈 몫입니다.
+    #   pooling 크기가 (3, 3)이라면 입력데이터의 행과 크기를 3으로 나눈 몫이 됩니다.
+    x = MaxPooling2D(input_shape=(2, 2))(x)
 
+    x = Dropout(rate=0.5)(x)
+    x = Flatten()(x)
+    x = Dropout(rate=0.5)(x)
+    x = Dense(units=100, activation='relu')(x)
+    output = Dense(units=10, activation='softmax')(x)
+    model = Model(inputs=input_tensor, outputs=output)
 
-input_tensor = Input(shape=(INPUT_SIZE, INPUT_SIZE, 1))
-# 결국 filter가 weight의 행렬임을 알자
-x = Conv2D(filters=32, kernel_size=(3, 3), strides=1, padding='same', activation='relu')(input_tensor)
-# 입력 데이터의 행 크기와 열 크기는 Pooling 사이즈의 배수(나누어 떨어지는 수)여야 합니다
-# Pooling 크기가 (2, 2) 라면 출력 데이터 크기는 입력 데이터의 행과 열 크기를 2로 나눈 몫입니다.
-# pooling 크기가 (3, 3)이라면 입력데이터의 행과 크기를 3으로 나눈 몫이 됩니다.
-MaxPooling2D(pool_size=(2,2))
+    return model
 
+def show_history(history):
+    plt.plot(history.history['accuracy'], label='train')
+    plt.plot(history.history['val_accuracy'], label='valid')
+    plt.legend()
+    plt.show()
 
+model = create_model()
+model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+history = model.fit(x=tr_images, y=tr_oh_labels, validation_data=(val_images, val_oh_labels), batch_size=500, epochs=3)
 
-
-
-
-
-
-
-
-
-
-
+show_history(history)
 
