@@ -37,13 +37,34 @@ test_oh_labels = to_categorical(test_labels)
 INPUT_SIZE = 28
 
 
+# [STUDY] filter는 채널별로 순회하며 feature map을 만든다.
+#   만약에 RGB의 세개의 채널이 있다면
+#   R -> (3,3) // G -> (3,3) // B -> (3,3)이 만들어졌다면
+#   각각의 행과 열에 맞춰 다시 곱을 하면 최종 feature map이 만들어진다.
+#   activation map은 feature map에 activation function(like relu)를 적용한 결과이다.
+#   따라서 최종결과는 activation map이 나온다.
+#   pooling은 activation map에 대해서 적용한다.
+#   pooling을 적용함으로 인해 크기를 줄이거나 특정 데이터를 강조하는 용도로 사용한다.
+
+
 def create_model():
-    # convolution 학습에서는 channel이 항상 마지막이다.
+    # [STUDY] convolution 학습을 시키기 위해서는 3차원의 input shape을 설정해줘야 한다.
+    #   그리고 channel이 항상 마지막이다.
+    #   batch까지 4차원을 받는데 input에서는 batch를 무시한다.
     input_tensor = Input(shape=(INPUT_SIZE, INPUT_SIZE, 1))
+    # 결국 filter가 weight의 행렬임을 알자
+    x = Conv2D(filters=32, kernel_size=(3, 3), strides=1, padding='same', activation='relu')(input_tensor)
+    print(type(x))
+    #x = Dropout(input_tensor)(x)
 
 
-
-
+input_tensor = Input(shape=(INPUT_SIZE, INPUT_SIZE, 1))
+# 결국 filter가 weight의 행렬임을 알자
+x = Conv2D(filters=32, kernel_size=(3, 3), strides=1, padding='same', activation='relu')(input_tensor)
+# 입력 데이터의 행 크기와 열 크기는 Pooling 사이즈의 배수(나누어 떨어지는 수)여야 합니다
+# Pooling 크기가 (2, 2) 라면 출력 데이터 크기는 입력 데이터의 행과 열 크기를 2로 나눈 몫입니다.
+# pooling 크기가 (3, 3)이라면 입력데이터의 행과 크기를 3으로 나눈 몫이 됩니다.
+MaxPooling2D(pool_size=(2,2))
 
 
 
