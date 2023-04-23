@@ -1,5 +1,4 @@
 import os
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten, Dropout
@@ -87,4 +86,3 @@ model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentrop
 history = model.fit(x=tr_images, y=tr_oh_labels, validation_data=(val_images, val_oh_labels), batch_size=500, epochs=3)
 
 show_history(history)
-
