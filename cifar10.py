@@ -1,8 +1,12 @@
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import numpy as np
 from keras import Input
 
 from keras.datasets import cifar10
-from keras.layers import Conv2D
+from keras.layers import Conv2D, MaxPooling2D, Activation
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
@@ -40,3 +44,19 @@ IMAGE_SIZE = 32
 
 input_tensor = Input(shape=(IMAGE_SIZE, IMAGE_SIZE, 3))
 x = Conv2D(filters=32, kernel_size=(5, 5), padding='valid', activation='relu')(input_tensor)
+x = Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu')(x)
+x = MaxPooling2D(pool_size=(2, 2))(x)
+
+x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu')(x)
+x = Conv2D(filters=64, kernel_size=(3, 3), padding='same')(x)
+x = Activation('relu')(x)
+x = MaxPooling2D(pool_size=2)
+
+x = Conv2D(filters=128, kernel_size=(3,3), padding='same',)
+
+
+
+
+
+
+
