@@ -20,29 +20,13 @@ from pandas import DataFrame
 # [STUDY] padding을 할 때, 몇 개의 padding을 할 것인가?를 위해 구하는 최종 행렬
 #   x = target_shape[0] -1 + filter_shape[0]
 
-x = (5,5)
+z = np.arange(-100, 101, 1, dtype=int)
+h = 1 / (1 + np.exp(-z))
 
 
+plt.plot(z, h)
+plt.show()
 
-
-
-
-
-
-
-
-
-
-
-
-
-# [STUDY] 1차원일 때, 왼쪽 2개, 오른쪽 3개로 padding을 할 것이다.
-#   2차원일 때, 행으로 x개, 열로 y개로 padding을 할 것이다.
-a = [1,2,3,4,5]
-np.pad(a, pad_width=(3,3))
-
-
-# 얼마만큼 padding을 할 것인가??
 
 exit()
 
