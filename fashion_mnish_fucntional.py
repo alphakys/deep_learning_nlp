@@ -74,6 +74,11 @@ model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentrop
 #   mode: {auto, min, max} 중 하나. monitor 지표가 감소해야 좋을 경우 min, 증가해야 좋을 경우 max, auto는 monitor 이름에서 자동으로 유추.
 #   model.fit(x=tr_images, y=tr_oh_labels, epochs=20, batch_size=32, verbose=1)
 
+# mode [auto, min, max] 지표에 따라서 달라짐
+# loss 같은 경우는 min accuracy는 max
+# auto는 자동으로 알아서 저장
+
+
 mcp_cb = ModelCheckpoint(filepath='weights.{epoch:02d}-{val_loss: 2f}.hdf5', monitor='val_loss', save_best_only=True,
                          mode='min',
                          period=5, verbose=1, save_weights_only=True)
@@ -85,7 +90,9 @@ mcp_cb = ModelCheckpoint(filepath='weights.{epoch:02d}-{val_loss: 2f}.hdf5', mon
 #   patience: Learing Rate를 줄이기 전에 monitor할 epochs 횟수.
 #   mode: {auto, min, max} 중 하나. monitor 지표가 감소해야 좋을 경우 min, 증가해야 좋을 경우 max, auto는 monitor 이름에서 유추.
 
-rlp_cb = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, mode='min', verbose=1)
+# factor 학습 속도를 줄일 인수 newlr = lr * factor
+# patience learning rate를 줄이기 전에 monitor할 epochs 횟수
+rlp_cb = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=10, mode='min', verbose=1)
 
 # [STUDY] EarlyStopping(monitor=‘val_loss’, min_delta=0, patience=0, verbose=0, mode=‘auto’, baseline=None, restore_best_weights=False)
 #   특정 epochs 동안 성능이 개선되지 않을 시 학습을 조기에 중단
@@ -95,7 +102,8 @@ rlp_cb = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, mode='min
 
 est_cb = EarlyStopping(monitor='val_accuracy', mode='max', verbose=1, patience=4)
 history = model.fit(x=tr_images, y=tr_oh_labels, batch_size=50, validation_data=(val_images, val_oh_labels),
-                    # callbacks=[rlp_cb, est_cb],
+                    callbacks=[rlp_cb],
+                        #, est_cb],
                     epochs=30)
 
 

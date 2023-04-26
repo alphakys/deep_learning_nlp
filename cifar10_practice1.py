@@ -1,24 +1,24 @@
 import numpy as np
-
-# [ glorot_normal ]
-fan_in = 10
-fan_out = 8
-
-scale_value = np.sqrt(2 / (fan_in + fan_out))
-
-print(f'scale : {scale_value}')
-
-weights = np.random.normal(loc=0.0, scale=scale_value, size=(100, 100))
-print(f'sum : {weights.sum()}, standard_deviation : {weights.std()}')
-
-# [ glorot_uniform ]
-limit = np.sqrt(6 / (fan_in + fan_out))
-
-print(f'limit : {limit}')
-
-weights_uniform = np.random.uniform(-1 * limit, limit, size=(100, 100))
-print(weights_uniform)
-print(f'weights_uniform sum : {weights_uniform.sum()}, std : {weights_uniform.std()}, mean : {weights_uniform.mean()}')
+#
+# # [ glorot_normal ]
+# fan_in = 10
+# fan_out = 8
+#
+# scale_value = np.sqrt(2 / (fan_in + fan_out))
+#
+# print(f'scale : {scale_value}')
+#
+# weights = np.random.normal(loc=0.0, scale=scale_value, size=(100, 100))
+# print(f'sum : {weights.sum()}, standard_deviation : {weights.std()}')
+#
+# # [ glorot_uniform ]
+# limit = np.sqrt(6 / (fan_in + fan_out))
+#
+# print(f'limit : {limit}')
+#
+# weights_uniform = np.random.uniform(-1 * limit, limit, size=(100, 100))
+# print(weights_uniform)
+# print(f'weights_uniform sum : {weights_uniform.sum()}, std : {weights_uniform.std()}, mean : {weights_uniform.mean()}')
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -27,7 +27,7 @@ import numpy as np
 from keras import Input
 
 from keras.datasets import cifar10
-from keras.layers import Conv2D, MaxPooling2D, Activation, Flatten, Dropout, Dense
+from keras.layers import Conv2D, MaxPooling2D, Activation, Flatten, Dropout, Dense, BatchNormalization
 from keras.models import Model
 from keras.optimizers import Adam
 from matplotlib import pyplot as plt
@@ -73,22 +73,33 @@ input_tensor = Input(shape=(IMAGE_SIZE, IMAGE_SIZE, 3))
 # padding은 valid이기 때문에 input 행렬의 크기는 줄어든다.
 # 32 - 5 +1 = 28
 # activation 함수도 설정해줬기 때문에 feature map => activation map
-x = Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu', kernel_initializer='he_normal')(input_tensor)
+x = Conv2D(filters=32, kernel_size=(3, 3), padding='same')(input_tensor)
+x = BatchNormalization()(x)
+x = Activation('relu')(x)
 # shape = (None, 28, 28, 32)의 input이 들어오고 여기에 filter shape = (3, 3, 32) * 32개의 필터가 생성됨
 # 왜냐하면 input의 depth가 32이기 때문에
 
-x = Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
+x = Conv2D(filters=32, kernel_size=(3, 3), padding='same')(x)
+x = BatchNormalization()(x)
+x = Activation('relu')(x)
 # pooling 과정을 통해서 원하는 부분을 강조하거나 큰 데이터 행렬 사이즈를 줄일 수 있다.
 # 결과는 행 /2 열 / 2가 된다.
 x = MaxPooling2D(pool_size=(2, 2))(x)
 
-x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
-x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', kernel_initializer='he_normal')(x)
+x = Conv2D(filters=64, kernel_size=(3, 3), padding='same')(x)
+x = BatchNormalization()(x)
+x = Activation('relu')(x)
+x = Conv2D(filters=64, kernel_size=(3, 3), padding='same')(x)
+x = BatchNormalization()(x)
 x = Activation('relu')(x)
 x = MaxPooling2D(pool_size=2)(x)
 
-x = Conv2D(filters=128, kernel_size=(3, 3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
-x = Conv2D(filters=128, kernel_size=(3, 3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
+x = Conv2D(filters=128, kernel_size=(3, 3), padding='same')(x)
+x = BatchNormalization()(x)
+x = Activation('relu')(x)
+x = Conv2D(filters=128, kernel_size=(3, 3), padding='same')(x)
+x = BatchNormalization()(x)
+x = Activation('relu')(x)
 x = MaxPooling2D(pool_size=(2, 2))(x)
 
 # 3차원의 input을 1차원으로 길게 늘여준다.
@@ -132,8 +143,8 @@ model.evaluate(test_images, test_labels)
 # #   예를들면 axis=0이면 현재 3차원이기 때문에 (32, 32, 3) ==>>>> (1, 32, 32, 3) 결과가 나옴
 # #   그리고 결과값은 10개의 클래스를 가지는 softmax이기 때문에 각 클래스에 대한 확률이 나온다.
 # #   그 중에서 max번째의 index가 클래스에 해당하겠지?
-#
-# # 한 개를 예측할 때는 아래와 같이 4차원으로 설정해서 예측해야함
+
+# 한 개를 예측할 때는 아래와 같이 4차원으로 설정해서 예측해야함
 # prd = model.predict(np.expand_dims(test_images[0], axis=0))
 # # 그러나 batch_size를 사용한다면 4차원으로 알아서 인식하고 만들어주는 듯하다.
 # prd = model.predict(test_images[:32], batch_size=32)
