@@ -3,7 +3,8 @@ from keras import Input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 
 from keras.datasets import cifar10
-from keras.layers import Conv2D, MaxPooling2D, Activation, Flatten, Dropout, Dense, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D, Activation, Flatten, Dropout, Dense, BatchNormalization, \
+    GlobalAveragePooling2D
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.utils import to_categorical
@@ -62,18 +63,10 @@ def get_train_valid_test_set(train_images, train_labels, test_images, test_label
 
 def create_model(input_shape_size, verbose=False):
     input_tensor = Input(shape=(input_shape_size, input_shape_size, 3))
-    x = Conv2D(filters=32, kernel_size=(3, 3), padding='same', )(input_tensor)
+    x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', )(input_tensor)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
 
-    x = Conv2D(filters=32, kernel_size=(3, 3), padding='same')(x)
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    x = MaxPooling2D(pool_size=(2, 2))(x)
-
-    x = Conv2D(filters=64, kernel_size=(3, 3), padding='same')(x)
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
     x = Conv2D(filters=64, kernel_size=(3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
@@ -86,13 +79,25 @@ def create_model(input_shape_size, verbose=False):
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
+
+    x = Conv2D(filters=256, kernel_size=(3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Conv2D(filters=256, kernel_size=(3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+
+    # 512 filters Conv layer 추가하되 이후 MaxPooling을 적용하지 않고 strides는 2로 변경하여 출력 feature map 크기 조정
+    x = Conv2D(filters=512, kernel_size=3, strides=2, padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
 
     # fully connected layer
-
-    x = Flatten()(x)
+    x = GlobalAveragePooling2D()(x)
     x = Dropout(rate=0.5)(x)
-    x = Dense(units=300, activation='relu')(x)
-    x = Dropout(rate=0.3)(x)
+    x = Dense(units=50, activation='relu')(x)
+    x = Dropout(rate=0.2)(x)
     output = Dense(units=10, activation='softmax')(x)
 
     model = Model(inputs=input_tensor, outputs=output)
