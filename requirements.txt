@@ -1,0 +1,3 @@
+pip install ydata-profiling
+pip install FuzzyTM
+sudp apt install default-jdk
