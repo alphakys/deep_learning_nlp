@@ -7,13 +7,11 @@ from matplotlib import pyplot as plt
 
 from pathlib import Path
 import numba
-
+import cv2
 
 img_directory_path = '/media/alpha/Samsung_T5/deepLearning/my_face/'
 img_directory_path_object = Path('/media/alpha/Samsung_T5/deepLearning/my_face/')
 imgs = list(img_directory_path_object.glob('*.jpg'))
-
-
 
 
 
