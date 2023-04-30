@@ -1,3 +1,7 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+from keras.regularizers import l2, l1_l2
 import numpy as np
 from keras import Input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
@@ -63,27 +67,27 @@ def get_train_valid_test_set(train_images, train_labels, test_images, test_label
 
 def create_model(input_shape_size, verbose=False):
     input_tensor = Input(shape=(input_shape_size, input_shape_size, 3))
-    x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', )(input_tensor)
+    x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', kernel_regularizer=l2(0.00001))(input_tensor)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
 
-    x = Conv2D(filters=64, kernel_size=(3, 3), padding='same')(x)
+    x = Conv2D(filters=64, kernel_size=(3, 3), padding='same', kernel_regularizer=l2(0.00001))(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
 
-    x = Conv2D(filters=128, kernel_size=(3, 3), padding='same')(x)
+    x = Conv2D(filters=128, kernel_size=(3, 3), padding='same', kernel_regularizer=l1_l2(l1=1e-5, l2=1e-4))(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Conv2D(filters=128, kernel_size=(3, 3), padding='same')(x)
+    x = Conv2D(filters=128, kernel_size=(3, 3), padding='same', kernel_regularizer=l2(0.00001))(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
 
-    x = Conv2D(filters=256, kernel_size=(3, 3), padding='same')(x)
+    x = Conv2D(filters=256, kernel_size=(3, 3), padding='same', kernel_regularizer=l2(0.00001))(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Conv2D(filters=256, kernel_size=(3, 3), padding='same')(x)
+    x = Conv2D(filters=256, kernel_size=(3, 3), padding='same', kernel_regularizer=l2(0.00001))(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
@@ -96,7 +100,7 @@ def create_model(input_shape_size, verbose=False):
     # fully connected layer
     x = GlobalAveragePooling2D()(x)
     x = Dropout(rate=0.5)(x)
-    x = Dense(units=50, activation='relu')(x)
+    x = Dense(units=50, activation='relu', kernel_regularizer=l2(0.00001))(x)
     x = Dropout(rate=0.2)(x)
     output = Dense(units=10, activation='softmax')(x)
 
