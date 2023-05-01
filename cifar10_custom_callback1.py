@@ -20,7 +20,9 @@ NAMES = np.array(['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog'
 
 (train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
 
+print(type(train_images))
 
+exit()
 def show_images(imgs, labels, cnt, ncols=4):
     if cnt // 4:
         nrow = cnt // 4
