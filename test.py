@@ -1,3 +1,6 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -6,6 +9,8 @@ import matplotlib.cm as cm
 from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
+# from keras.datasets import cifar10
+
 
 # 목표 데이터의 shape
 # object_shape
@@ -19,16 +24,11 @@ from pandas import DataFrame
 
 # [STUDY] padding을 할 때, 몇 개의 padding을 할 것인가?를 위해 구하는 최종 행렬
 #   x = target_shape[0] -1 + filter_shape[0]
-
-z = np.arange(-100, 101, 1, dtype=int)
-h = 1 / (1 + np.exp(-z))
+# (train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
 
 
-plt.plot(z, h)
-plt.show()
 
 
-exit()
 
 # [STUDY]
 #  C order란 ROW MAJOR ORDER를 의미한다.

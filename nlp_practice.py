@@ -32,5 +32,3 @@ tokenizer = TreebankWordTokenizer
 tokenizer = TreebankWordTokenizer()
 tokenizer.tokenize("we're family")
 
-
-import kss
