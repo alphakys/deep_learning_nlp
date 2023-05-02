@@ -32,3 +32,25 @@ tokenizer = TreebankWordTokenizer
 tokenizer = TreebankWordTokenizer()
 tokenizer.tokenize("we're family")
 
+from nltk.stem import WordNetLemmatizer
+
+lemmatizer = WordNetLemmatizer()
+
+words = ['policy', 'doing', 'organization', 'have', 'going', 'love', 'lives', 'fly', 'dies', 'watched', 'has', 'starting']
+
+print('표제어 추출 전 :',words)
+print('표제어 추출 후 :',[lemmatizer.lemmatize(word) for word in words])
+
+
+from nltk.stem import PorterStemmer
+from nltk.stem import LancasterStemmer
+
+from nltk.tokenize import word_tokenize
+
+stemmer = PorterStemmer()
+lanca_stemmer = LancasterStemmer()
+
+lanca_stemmer.stem()
+
+stemmer.stem('has')
+
