@@ -13,7 +13,7 @@ from pandas import DataFrame
 
 
 # 목표 데이터의 shape
-# object_shape
+# object_sha
 
 # 목표 shape
 # target_shape
