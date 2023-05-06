@@ -2,6 +2,8 @@ import os
 
 import warnings
 
+import nltk
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -9,13 +11,13 @@ import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import WordPunctTokenizer
 from keras.preprocessing.text import text_to_word_sequence
 
 import pandas as pd
-from ydata_profiling import ProfileReport
 
 from nltk.tokenize import word_tokenize
 
