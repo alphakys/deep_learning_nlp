@@ -35,12 +35,118 @@ vector.fit_transform(corpus).toarray()
 vector.vocabulary_
 
 
+import pandas as pd
+from math import log
+
+docs = [
+  '먹고 싶은 사과',
+  '먹고 싶은 바나나',
+  '길고 노란 바나나 바나나',
+  '저는 과일이 좋아요'
+]
+vocab = list(set(w for doc in docs for w in doc.split()))
+
+vocab.sort()
+
+N = len(docs)
+
+def tf(term, d):
+    return d.count(term)
+
+
+def idf(term):
+    df = 0
+    for doc in docs:
+        df += doc.count(term)
+    return log(N / (df+1))
+
+
+def tfidf(t, d):
+    return tf(t, d) * idf(t)
+
+
+
+result = []
+
+for i in range(N):
+    result.append([])
+    d = docs[i]
+    for j in range(len(vocab)):
+        t = vocab[j]
+        result[-1].append(tf(t, d))
+
+tf_ = pd.DataFrame(result, columns=vocab)
+
+
+result = []
+
+for i in range(N):
+    result.append([])
+    d = docs[i]
+    for j in range(len(vocab)):
+        t = vocab[j]
+        result[-1].append(tf(t, d))
+
+tf_ = pd.DataFrame(result, columns=vocab)
+
+
+result = []
+
+for j in range(len(vocab)):
+    t = vocab[j]
+    result.append(idf(t))
+
+idf_ = pd.DataFrame(result, index=vocab, columns=["IDF"])
+
+
+result = []
+for i in range(N):
+  result.append([])
+  d = docs[i]
+  for j in range(len(vocab)):
+    t = vocab[j]
+    result[-1].append(tfidf(t,d))
+
+tfidf_ = pd.DataFrame(result, columns = vocab)
+tfidf_
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+corpus = [
+    'you know I want your love',
+    'I like you',
+    'what should I do ',
+]
+
+vector = CountVectorizer()
+
+vector.fit_transform(corpus).toarray()
+
+vector.vocabulary_
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+tfidfv = TfidfVectorizer().fit(corpus)
+
+print(tfidfv.transform(corpus).toarray())
+print(tfidfv.vocabulary_)
 
 
 
 
 
-{}.get()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
