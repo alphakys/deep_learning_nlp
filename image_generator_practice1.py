@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import os
 
-from docutils.nodes import image
 from matplotlib import pyplot as plt
 
 from keras.preprocessing.image import ImageDataGenerator
@@ -56,6 +55,36 @@ def show_aug_image_batch(image_batch):
         axes[i].imshow(aug_image[i])
         axes[i].axis('off')
         fig.show()
+
+
+img_batch = np.array(list(img_gen(imgs_link)), dtype=np.uint8)
+
+# data_generator = ImageDataGenerator(horizontal_flip=True, vertical_flip=True)
+# show_aug_image_batch(img_batch)
+
+# data_generator = ImageDataGenerator(width_shift_range=0.5)
+# show_aug_image_batch(img_batch)
+
+# 위쪽 또는 아래쪽 이미지 이동을 주어진 range만큼 이동한다.
+# data_generator = ImageDataGenerator(height_shift_range=0.5)
+# show_aug_image_batch(img_batch)
+
+# 빈공간은 가장 가까운 곳의 픽셀값으로 채움
+# data_generator = ImageDataGenerator(height_shift_range=0.5, fill_mode='nearest')
+# show_aug_image_batch(img_batch)
+
+# 빈공간 만큼의 영역을 근처 공간으로 채움
+# data_generator = ImageDataGenerator(height_shift_range=0.5, fill_mode='reflect')
+# show_aug_image_batch(img_batch)
+
+# 빈공간 만큼의 영역을 잘려나간 이미지로 채움
+# data_generator = ImageDataGenerator(height_shift_range=0.5, fill_mode='wrap')
+# show_aug_image_batch(img_batch)
+
+# 특정 픽셀값으로 채움. 이때 특정 픽셀값은 cval 값으로 채움
+data_generator = ImageDataGenerator(height_shift_range=0.5, fill_mode='constant', cval=100)
+show_aug_image_batch(img_batch)
+
 
 
 img_batch = np.array(list(img_gen(imgs_link)), dtype=np.uint8)
