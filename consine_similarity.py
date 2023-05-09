@@ -15,6 +15,8 @@ def get_cos_theta(vector_a: ndarray, vector_b: ndarray):
     distance = np.sqrt(np.sum((vector_a - vector_b) ** 2))
     dot = vector_a @ vector_b
 
+
+    distance * dot
     return dot / distance
 
 
