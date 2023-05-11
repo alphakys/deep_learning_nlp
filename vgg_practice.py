@@ -1,49 +1,97 @@
 import os
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from keras.applications import ResNet50V2, Xception
+from numpy import ndarray
+from sklearn.model_selection import train_test_split
+
 import cv2
 from keras.utils import to_categorical
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-from keras.layers import Dense, GlobalAveragePooling2D
+from keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from keras import Input, Model
 from keras.applications.vgg16 import VGG16
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot as plt
 
 import numpy as np
 
 from keras.datasets import cifar10
 
-(train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
 
-IMAGE_SIZE = 32
-# pretrained 모델을 사용에 적합한 size로 resize한다.
-DESTINATION_SIZE = 64
+def get_preprocessed_data(images, labels, scaling=True):
+    if scaling:
+        images = np.array(images, dtype=np.float32) / 255.0
+    images = np.array(images, dtype=np.float32)
+    labels = np.array(labels, dtype=np.float32)
 
-# train / test image를 로드하고 image와 label을 preprocessing 한다.
-
-def get_oh_encoding(train_labels, test_labels):
-    return to_categorical(train_labels), to_categorical(test_labels)
-
-def preprocessing_data(train_images, test_images, train_labels, test_labels):
-    # image는 255.0으로 나누어서 0~1사이의 값으로 processing 하고
-    # label은 one_hot_encoding 한다.
-
-    cv2.resize(dsize=(64, 64))
-    train_processed_images = np.array(train_images/255.0, dtype=np.flot32)
-    test_processed_images = np.array(test_images / 255.0, dtype=np.flot32)
+    return images, labels
 
 
+def get_preprocessed_ohe(images, labels):
+    images, labels = get_preprocessed_data(images, labels, scaling=False)
+    oh_labels = to_categorical(labels)
+    return images, oh_labels
 
-    return tr_images, test_images,
+
+def get_train_valid_test_set(train_images, train_labels, test_images, test_labels, valid_size=0.15):
+    train_images, train_oh_labels = get_preprocessed_ohe(train_images, train_labels)
+    test_images, test_oh_labels = get_preprocessed_ohe(test_images, test_labels)
+
+    tr_images, val_images, tr_oh_labels, val_oh_labels = train_test_split(train_images, train_oh_labels,
+                                                                          test_size=valid_size)
+
+    return tr_images, tr_oh_labels, val_images, val_oh_labels, test_images, test_oh_labels
 
 
-print(train_images.shape, test_images.shape)
+# 입력 image의 크기를 resize 값 만큼 증가. CIFAR10의 이미지가 32x32로 작아서 마지막 feature map의 크기가 1로 되어 모델 성능이 좋지 않음.
+# 마지막 feature map의 크기를 2로 만들기 위해 resize를 64로 하여 입력 이미지 크기를 변경. 단 메모리를 크게 소비하므로 64이상은 kernel이 다운됨.
+def get_resized_images(images, resize=64):
+
+    resized_images = list(cv2.resize(img, (resize, resize)) for img in images)
+    resized_images = np.array(resized_images)
+    return resized_images
 
 
-#
-#
-# IMAGE_SIZE = 32
-# BATCH_SIZE = 64
+def create_base_model(input_size, model_name='vgg16', verbose=False):
+    input_tensor = Input(shape=(input_size, input_size, 3))
+    print(input_tensor)
+
+    if model_name == 'vgg16':
+        base_model = VGG16(include_top=False, weights='imagenet', input_tensor=input_tensor)
+    elif model_name == 'resnet50':
+        base_model = ResNet50V2(include_top=False, weights='imagenet', input_tensor=input_tensor)
+    elif model_name == 'xception':
+        base_model = Xception(include_top=False, weights='imagenet', input_tensor=input_tensor)
+
+    if verbose:
+        print(base_model.summary())
+
+    bm_output = base_model.output
+
+    x = GlobalAveragePooling2D()(bm_output)
+    x = Dense(50, activation='relu')
+    if model_name != 'vgg16':
+        x = Dropout(0.5)(x)
+    x = Dropout(0.5)(x)
+
+IMAGE_SIZE = 64
+BATCH_SIZE = 64
+
+def do_cifar10_train_evaluation(image_size=IMAGE_SIZE, model_name='vgg16'):
+
+    (train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
+    tr_images, tr_oh_labels, val_images, val_oh_labels, test_images, test_oh_labels = \
+        get_train_valid_test_set(train_images, train_labels, test_images, test_labels, valid_size=0.15)
+
+    if image_size > 32:
+        tr_images = get_resized_images(tr_images)
+        val_images = get_resized_images(val_images)
+        test_images = get_resized_images(test_images)
+
+    create_base_model(image_size, model_name)
+
+
 #
 # input_tensor = (IMAGE_SIZE, IMAGE_SIZE, 3)
 # # cifar는 classification이 10개이기 때문에 imagenet의 full conncected layer를 사용할 필요가 없다.
@@ -69,3 +117,22 @@ print(train_images.shape, test_images.shape)
 #
 # model.summary()
 
+
+# [STUDY]
+#   NUMPY MEAN
+#    t = np.array([[[1,1,1], [2,2,2], [3,3,3]],[[4,4,4], [5,5,5], [6,6,6]]])
+#    array([[[1, 1, 1],
+#            [2, 2, 2],
+#            [3, 3, 3]],
+#           [[4, 4, 4],
+#            [5, 5, 5],
+#            [6, 6, 6]]])
+#    t.shape
+#    Out[49]: (2, 3, 3)
+#    np.mean(t)
+#    Out[50]: 3.5
+#    np.mean(t, axis=0)
+#    axis 0 -> 각 row별로 평균을 낸다.
+#    axis 1 -> 각 column별로 평균을 낸다. => 각 3차원 마다 (1,2,3), (1,2,3), (1,2,3)
+#                                                     (4,5,6), (4,5,6), (4,5,6)
+#    3차원 matrix의 각 차원 마다의 평균값 => np.mean(t, axis=(2,1))
