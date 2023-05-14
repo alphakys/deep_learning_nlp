@@ -17,4 +17,16 @@ def get_cos_theta(vector_a: ndarray, vector_b: ndarray):
     return dot / vector_distance
 
 movies = pd.read_csv('movies_metadata.csv', low_memory=False)
+# movies pandas에 Nan 값을 '' 대체해서 채운다.
+movies = movies.fillna('')
 
+# TfidfVectorizer(stop_words='english') => 불용어 initialize할 때 설정
+tfidf = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf.fit_transform(movies['overview'])
+
+# cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+# print(cosine_sim.shape)
+
+def search_similarity(title):
+    index = title_to_index[title]
