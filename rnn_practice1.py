@@ -10,10 +10,19 @@ from keras.models import Sequential
 
 from keras.models import Model
 
-model = Sequential()
-model.add(SimpleRNN(3, input_shape=(2, 10)))
+# 메모리 셀의 최종 시점의 은닉 상태만을 리턴하고자 한다면 (batch_size, output_dim) 크기의 2D 텐서를 리턴합니다.
+# model = Sequential()
+# input_shape = [input_length, input_dim]과 같음
+# 따라서 input_length => time_steps, input_dim => Dimensionality of the word representation
+
+# 따라서 2D tensor임 => (hidden_units,(input_length, input_dim))
+# model.add(SimpleRNN(units=3, input_shape=(2, 10)))
 
 # model.summary()
+# model1 = Sequential()
+# model1.add(SimpleRNN(units=3, batch_input_shape=(8, 2, 10), return_sequences=True))
+
+# 이미지로 이해하면 가로가 timesteps, 세로가 input_dim(word 개수) batch_size는 이미지의 개수(3차원 값)
 
 # timesteps는 시점의 수입니다. 자연어 처리에서는 보통 문장의 길이입니다.
 timesteps = 10
@@ -24,20 +33,49 @@ input_dim = 4
 hidden_units = 8
 
 input_shape = (timesteps, input_dim)
-# inputs는 (10, 4)
-inputs = np.random.random((timesteps, input_dim))
 
+# 입력 2D 텐서
+# time_steps = 10은 문장의 길이
+# input_dim은 4개의 단어
+
+# 따라서
+# 1. 나는1 너를 좋아해 그래
+# 2. 나는 좋아해1 너를 그래
+# 3. 좋아해 너를1 나는 그래
+# 4. 나는1 너를 좋아해 그래
+# 5. 나는 좋아해1 너를 그래
+# 6. 좋아해 너를1 나는 그래
+# 7. 나는1 너를 좋아해 그래
+# 8. 나는 좋아해1 너를 그래
+# 9. 좋아해 너를1 나는 그래
+# 10. 나는1 너를 좋아해 그래
+
+# 나는 좋아해 너를 나는 좋아해 너를 나는 좋아해 너를 나는
+
+inputs = np.random.random(input_shape)
+
+print(inputs.shape)
 # 초기의 hidden state를 zero로 초기화한다.
 hidden_state_t = np.zeros((hidden_units,))
 
-print(hidden_state_t)
-
 Wx = np.random.random((hidden_units, input_dim))
 Wh = np.random.random((hidden_units, hidden_units))
+b = np.random.random((hidden_units,))
+
+total_hidden_states = []
+
+for idx, input_t in enumerate(inputs):
+    print(f'단어 {idx} : {input_t}')
+    print(f'단어 {idx} : {Wx}')
 
 
-from keras.datasets import mnist
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+    print(Wx.shape, input_t.shape)
+    output_t = np.tanh(np.dot(Wx, input_t) + np.dot(Wh, hidden_state_t) + b)
+    print(output_t)
+
+
+# from keras.datasets import mnist
+# (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 
 

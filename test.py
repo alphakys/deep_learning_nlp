@@ -1,7 +1,9 @@
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
+import tensorflow as tf
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -9,25 +11,35 @@ import matplotlib.cm as cm
 from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
-# from keras.datasets import cifar10
+from keras.datasets import mnist
 
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
-# 목표 데이터의 shape
-# object_sha
+# unrolled through 28 time steps
+time_steps = 28
 
-# 목표 shape
-# target_shape
+# hidden LSTM units
+num_units = 128
 
-# filter shape
-# filter_shape
+# rows of 28 pixels
+n_input = 28
 
+# learning rate for adam
+learning_rate = 0.001
+
+# mnist is ten classes
+n_classes = 10
+
+# size of batch
+batch_size = 128
+
+out_weights = tf.random.normal([num_units, n_classes])
+out_bias = tf.random.normal([n_classes])
+
+print(out_weights)
 
 # [STUDY] padding을 할 때, 몇 개의 padding을 할 것인가?를 위해 구하는 최종 행렬
 #   x = target_shape[0] -1 + filter_shape[0]
-# (train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
-
-
-
 
 
 # [STUDY]
