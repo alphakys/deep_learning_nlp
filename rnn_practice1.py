@@ -65,14 +65,19 @@ b = np.random.random((hidden_units,))
 total_hidden_states = []
 
 for idx, input_t in enumerate(inputs):
-    print(f'단어 {idx} : {input_t}')
-    print(f'단어 {idx} : {Wx}')
 
-
-    print(Wx.shape, input_t.shape)
     output_t = np.tanh(np.dot(Wx, input_t) + np.dot(Wh, hidden_state_t) + b)
-    print(output_t)
+    print(np.dot(Wx, input_t).shape)
+    print(np.dot(Wh, hidden_state_t).shape)
+    print(b.shape)
+    # print(list(output_t))
+    total_hidden_states.append(list(output_t))
+    hidden_state_t = output_t
 
+total_hidden_states = np.stack(total_hidden_states, axis=0)
+
+print('은닉 상태')
+print(total_hidden_states)
 
 # from keras.datasets import mnist
 # (x_train, y_train), (x_test, y_test) = mnist.load_data()

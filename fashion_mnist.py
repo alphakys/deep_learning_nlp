@@ -82,7 +82,37 @@ print(history.history['accuracy'])
 print(history.history['val_loss'])
 print(history.history['val_accuracy'])
 
-
+import keras
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense, SimpleRNN
+# Load the MNIST dataset
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+# Reshape the data
+x_train = x_train.reshape(60000, 28, 28)
+x_test = x_test.reshape(10000, 28, 28)
+# Convert the labels to categorical data
+y_train = keras.utils.to_categorical(y_train, 10)
+y_test = keras.utils.to_categorical(y_test, 10)
+# Define the model
+model = Sequential()
+model.add(SimpleRNN(units=128, input_shape=(28, 28)))
+model.add(Dense(10, activation='softmax'))
+# Compile the model
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# Train the model
+model.fit(x_train, y_train, epochs=10, verbose=0)
+# Evaluate the model
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+# Get the states for each step
+states = []
+for i in range(len(x_test)):
+    states.append(model.predict_state_at(x_test[i]))
+# Print the states
+for state in states:
+    print(state)
 #
 # # predict할 때, 애초에 fit을 시킬 때, 3차원 데이터를 넣어서 fit 했기 때문에 predict하는 데이터도 3차원으로 매개변수에 넣어준다.
 # # 이 때, 사용하는 함수가 expand_dims이다. axis는 0이면 차원, 1이면 행, 2이면 열이다.
