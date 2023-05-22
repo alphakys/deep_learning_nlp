@@ -13,30 +13,20 @@ import pandas as pd
 from pandas import DataFrame
 from keras.datasets import mnist
 
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+sentence = 'What wii the fat cat sit on'
 
-# unrolled through 28 time steps
-time_steps = 28
+from keras.layers import TextVectorization
 
-# hidden LSTM units
-num_units = 128
 
-# rows of 28 pixels
-n_input = 28
+sentence = 'What wii the fat cat sit on'
 
-# learning rate for adam
-learning_rate = 0.001
+from keras.preprocessing.text import text_to_word_sequence
+import tensorflow as tf
 
-# mnist is ten classes
-n_classes = 10
+token = text_to_word_sequence(sentence)
 
-# size of batch
-batch_size = 128
 
-out_weights = tf.random.normal([num_units, n_classes])
-out_bias = tf.random.normal([n_classes])
 
-print(out_weights)
 
 # [STUDY] padding을 할 때, 몇 개의 padding을 할 것인가?를 위해 구하는 최종 행렬
 #   x = target_shape[0] -1 + filter_shape[0]
