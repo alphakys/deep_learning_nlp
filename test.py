@@ -25,6 +25,23 @@ import tensorflow as tf
 
 token = text_to_word_sequence(sentence)
 
+import numpy as np
+np.linspace(0,1,10)
+a = np.linspace(0,1,10)
+a = np.linspace(0.1,0.9,50)
+
+from matplotlib import pyplot as plt
+a = np.linspace(0.001,0.97,50)
+a = np.linspace(0.001,0.97,500)
+
+a = np.linspace(0.001,0.9999,500)
+y = [v/(1-v) for v in a]
+y = np.array(y)
+y = np.log(y)
+plt.plot(a, y, 'r')
+plt.plot(y, a, 'r')
+plt.plot(y, a, 'b')
+
 
 # 로짓함수와 로지스틱 함수의 관계 및 로지스틱 회귀분석에 대한 전반적인 이해
 # 한 50퍼센트 이해한거 같다. 조금만 더 공부하면 될거 같다.
