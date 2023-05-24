@@ -15,6 +15,7 @@ from keras.datasets import mnist
 
 sentence = 'What wii the fat cat sit on'
 
+from decimal import Decimal
 from keras.layers import TextVectorization
 
 
@@ -45,7 +46,7 @@ plt.plot(y, a, 'b')
 
 # 로짓함수와 로지스틱 함수의 관계 및 로지스틱 회귀분석에 대한 전반적인 이해
 # 한 50퍼센트 이해한거 같다. 조금만 더 공부하면 될거 같다.
-#
+# 이제 한 80퍼센트 이해한거 같다.!!
 
 
 # [STUDY] padding을 할 때, 몇 개의 padding을 할 것인가?를 위해 구하는 최종 행렬
