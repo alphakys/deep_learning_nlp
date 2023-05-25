@@ -1,47 +1,87 @@
 import os
+import warnings
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import tensorflow as tf
 
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 
 from sklearn.cluster import KMeans
 import pandas as pd
 from pandas import DataFrame
 from keras.datasets import mnist
 
-sentence = 'What wii the fat cat sit on'
 
 from decimal import Decimal
 from keras.layers import TextVectorization
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_breast_cancer
 
 
-sentence = 'What wii the fat cat sit on'
 
-from keras.preprocessing.text import text_to_word_sequence
-import tensorflow as tf
+ads_pd = pd.read_csv('Social_Network_Ads.csv')
+ads_pd['Gender'] = ads_pd['Gender'].transform(lambda x: float(1) if x == 'Male' else float(0))
 
-token = text_to_word_sequence(sentence)
+X = ads_pd.iloc[:, 1:-1]
+y = ads_pd.iloc[:, -1]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-import numpy as np
-np.linspace(0,1,10)
-a = np.linspace(0,1,10)
-a = np.linspace(0.1,0.9,50)
+ss = StandardScaler()
+# processed_X = ss.fit_transform(X_train)
 
-from matplotlib import pyplot as plt
-a = np.linspace(0.001,0.97,50)
-a = np.linspace(0.001,0.97,500)
+lr = LogisticRegression()
 
-a = np.linspace(0.001,0.9999,500)
-y = [v/(1-v) for v in a]
-y = np.array(y)
-y = np.log(y)
-plt.plot(a, y, 'r')
-plt.plot(y, a, 'r')
-plt.plot(y, a, 'b')
+# x_train = x_train.values.reshape(-1, 1)
+# x_test = x_test.values.reshape(-1, 1)
+# y_train = y_train.values.reshape(-1, 1)
+# y_test = y_test.values.reshape(-1, 1)
+#
+
+#
+# processed_x_train = ss.fit_transform(x_train)
+# processed_x_test = ss.fit_transform(x_test)
+#
+# lr.fit(processed_x_train, y_train)
+# lr.fit()
+
+
+
+
+
+
+
+# sentence = 'What wii the fat cat sit on'
+#
+# from keras.preprocessing.text import text_to_word_sequence
+# import tensorflow as tf
+#
+# token = text_to_word_sequence(sentence)
+#
+# import numpy as np
+#
+# np.linspace(0, 1, 10)
+# a = np.linspace(0, 1, 10)
+# a = np.linspace(0.1, 0.9, 50)
+#
+# from matplotlib import pyplot as plt
+#
+# a = np.linspace(0.001, 0.97, 50)
+# a = np.linspace(0.001, 0.97, 500)
+#
+# a = np.linspace(0.001, 0.9999, 500)
+# y = [v / (1 - v) for v in a]
+# y = np.array(y)
+# y = np.log(y)
+# plt.plot(a, y, 'r')
+# plt.plot(y, a, 'r')
+# plt.plot(y, a, 'b')
+
+
 
 
 # 로짓함수와 로지스틱 함수의 관계 및 로지스틱 회귀분석에 대한 전반적인 이해
