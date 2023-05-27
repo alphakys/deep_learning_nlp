@@ -15,3 +15,11 @@ tokenizer = Tokenizer()
 tokenizer.fit_on_texts(texts)
 tokenizer.texts_to_matrix(texts, mode='tfidf').round(2)
 
+from sklearn.datasets import fetch_20newsgroups
+import matplotlib.pyplot as plt
+from keras.preprocessing.text import Tokenizer
+from keras.utils import to_categorical
+
+newsdata = fetch_20newsgroups(subset='train')
+
+print(newsdata)
