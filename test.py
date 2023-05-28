@@ -17,6 +17,9 @@ from keras.datasets import mnist
 
 from decimal import Decimal
 from keras.layers import TextVectorization
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -24,23 +27,23 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 
-cancer_data = load_breast_cancer()
-
-cancer_df = pd.DataFrame(data=cancer_data['data'], columns=cancer_data['feature_names'])
-y = cancer_data['target']
-
-ss = StandardScaler()
-processed_dataset = ss.fit_transform(cancer_df)
-
-X_train, X_test, y_train, y_test = train_test_split(processed_dataset, y, random_state=0)
-
-lr = LogisticRegression()
-lr.fit(X_train, y_train)
-
-prd = lr.predict(X_test)
-score = accuracy_score(y_test, prd)
-
-cm = confusion_matrix(y_true=y_test, y_pred=prd)
+# cancer_data = load_breast_cancer()
+#
+# cancer_df = pd.DataFrame(data=cancer_data['data'], columns=cancer_data['feature_names'])
+# y = cancer_data['target']
+#
+# ss = StandardScaler()
+# processed_dataset = ss.fit_transform(cancer_df)
+#
+# X_train, X_test, y_train, y_test = train_test_split(processed_dataset, y, random_state=0)
+#
+# lr = LogisticRegression()
+# lr.fit(X_train, y_train)
+#
+# prd = lr.predict(X_test)
+# score = accuracy_score(y_test, prd)
+#
+# cm = confusion_matrix(y_true=y_test, y_pred=prd)
 
 #
 # ads_pd = pd.read_csv('Social_Network_Ads.csv')

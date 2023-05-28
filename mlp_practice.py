@@ -1,9 +1,12 @@
 import os
 import warnings
 
-import pandas as pd
+from keras.optimizers import Adam
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import pandas as pd
+from keras import Input
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
@@ -14,7 +17,7 @@ from sklearn.datasets import fetch_20newsgroups
 import matplotlib.pyplot as plt
 from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
-
+from keras.optimizers import Adam
 
 newsdata = fetch_20newsgroups(subset='train')
 news_df = pd.DataFrame(data=newsdata.data, columns=['email'])
@@ -50,22 +53,53 @@ def prepare_data(train_data, test_data, mode):
 
     return X_train, X_test, tokenizer.word_index
 
+
 X_train, X_test, word_to_index = prepare_data(train_email, test_email, 'binary')
 
 train_label = to_categorical(train_label, num_classes=num_classes)
 test_label = to_categorical(test_label, num_classes=num_classes)
 
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation
 
 
+def fit_and_evaluate(train_data, test_data, train_label, test_label):
+    model = Sequential()
+    # input_tensor = Input(shape=(train_data.shape))
+    # [STUDY] Dense layer =>
+    #   units: 출력 뉴런의 수를 결정한다.
+    #   input_dim : 입력 뉴런의 수를 설정한다.
+    #   kernel_initilizer : 가중치를 초기화하는 방법 설정
+    #       uniform : 균등분포
+    #       normal : 가우시안 분포
+    #   activation : 활성화 함수 설정
+
+    # [STUDY] 이진분류 문제는 그렇다면 출력충이 하나의 값 => 0 / 1의 값으로만 반환되면 되기 때문에
+    #   출력층의 개수는 1개, 입력값의 수는 3개 일때, 그리고 활성화 함수는 시그모이드 함수 이유는 이진분류이기 때문
+    #   Dense(units=1, input_dim=3, activation='sigmoid')
+    #   다중클래스 분류문제에서 입력값이 4개, 출력값이 3개인 경우, 출력층으로 사용된 Dense 레이어
+    #   Dense(units=3, input_dim=4, activation='softmax')
+
+    # [STUDY] !! 핵심 !!
+    #  입력층이 아닐 때는 결국 그 이전 층의 units가 입력값이 되기 때문에 모든 Dense layer에서 input_dim을 설정할 필요가 없다.
+    model.add(Dense(units=256, input_shape=train_data.shape))
 
 
+# input_dim = 4, features = 10
+# input_shape = (4, 10)
+# dense1 = Dense(units=3, input_dim=4, activation='sigmoid')
+# dense2 = Dense(units=5, activation='sigmoid')
 
 
+(2, 4)
 
+    n1
+x1
+    n2
 
-
-
-
+    n3
+x2
+    n4
 
 
 
