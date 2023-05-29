@@ -1,13 +1,12 @@
 import os
 import warnings
 
-from keras.optimizers import Adam
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+from keras.optimizers import Adam
 import pandas as pd
 from keras import Input
-
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 from keras.preprocessing.text import Tokenizer
@@ -54,7 +53,7 @@ def prepare_data(train_data, test_data, mode):
     return X_train, X_test, tokenizer.word_index
 
 
-X_train, X_test, word_to_index = prepare_data(train_email, test_email, 'binary')
+# X_train, X_test, word_to_index = prepare_data(train_email, test_email, 'binary')
 
 train_label = to_categorical(train_label, num_classes=num_classes)
 test_label = to_categorical(test_label, num_classes=num_classes)
@@ -82,30 +81,36 @@ def fit_and_evaluate(train_data, test_data, train_label, test_label):
 
     # [STUDY] !! 핵심 !!
     #  입력층이 아닐 때는 결국 그 이전 층의 units가 입력값이 되기 때문에 모든 Dense layer에서 input_dim을 설정할 필요가 없다.
-    model.add(Dense(units=256, input_shape=train_data.shape))
+    #  256개의 출력 값을 만든다고 하는데 엄밀하게는 256개의 출력값이 아니라
+    #  마지막 axes의 값을 units로 설정한다가 좀 더 맞는 표현이라고 생각된다.
+    #  따라서 input_dim = (None, 10000)이고
+    #  output_shape = (None, 256)이라고 생각하면 된다.
+    #  염두할 것!!! => 항상 input_shape(모든 input layer에 대해서!!)에서 0차원이 batch_size이다. 명심하자.
+    #  그리고 batch_size는 학습시에 자동으로 keras에서 감지하여 batch_size를 설정하는 듯하다.
+    model.add(Dense(units=256, input_shape=(train_data.shape[1],), activation='relu'))
+    # [STUDY] 20%의 뉴런을 램덤하게 0으로 만들어서 과적합을 방지한다.
+    model.add(Dropout(0.5))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(units=num_classes, activation='softmax'))
 
+    model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+    # validation_split을 설정하면 그 비율만큼 evaluation을 하기 위한 데이터로 사용한다.
+    model.fit(X_train, train_label, batch_size=32, epochs=5, validation_split=0.1)
+    score = model.evaluate(X_test, test_label, batch_size=128, verbose=1)
+    return score
+
+
+modes = ['binary', 'count', 'tfidf', 'freq']
+
+for mode in modes:
+    X_train, X_test, word_to_index = prepare_data(train_email, test_email, mode)
+
+    score = fit_and_evaluate(X_train, X_test, train_label, test_label)
+
+    print(f"{mode} : {score}" )
 
 # input_dim = 4, features = 10
 # input_shape = (4, 10)
 # dense1 = Dense(units=3, input_dim=4, activation='sigmoid')
 # dense2 = Dense(units=5, activation='sigmoid')
-
-
-(2, 4)
-
-    n1
-x1
-    n2
-
-    n3
-x2
-    n4
-
-
-
-
-
-
-
-
-
