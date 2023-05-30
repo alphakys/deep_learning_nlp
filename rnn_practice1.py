@@ -53,10 +53,6 @@ for input in inputs:
     print(Wx)
     print(np.dot(Wx, input))
     break
-    # output_t = np.tanh(raw_hidden_state)
-    #
-    # hidden_states_list.append(output_t)
-    # test_l.append(test_state)
-    # hidden_state_t = output_t
+
 
 
