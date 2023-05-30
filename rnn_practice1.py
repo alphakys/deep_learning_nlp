@@ -10,60 +10,53 @@ from keras.models import Sequential
 
 from keras.models import Model
 
-# one layer rnn
+# [STUDY] return_sequences=True => 각 시점의 은닉 상태값을 반환한다.
+#   return_sequences=False => 마지막 시점의 은닉 상태값만 반환한다.
 model = Sequential()
-model.add(SimpleRNN(3, input_shape=(2, 10)))
-
+model.add(SimpleRNN(units=3, batch_input_shape=(8, 2, 10), return_sequences=True))
 model.summary()
 
-
-
-# timesteps는 시점의 수입니다. 자연어 처리에서는 보통 문장의 길이입니다.
 timesteps = 10
-# 입력의 차원. 자연어 처리에서는 보통 단어 벡터의 차원
 input_dim = 4
-# hidden_units는 은닉 상태의 크기로 메모리 셀의 용량입니다.
-# 초기 은닉 상태는 0의 값을 가지는 벡터로 초기화합니다.
 hidden_units = 8
 
-inputs = np.random.random((timesteps, input_dim))
-hidden_states = np.zeros(hidden_units)
+input_shape = (timesteps, input_dim)
 
-Wx_layer1 = np.random.random((hidden_units, input_dim))
-Wh_layer1 = np.random.random((hidden_units, hidden_units))
-bias_layer1 = np.random.random(hidden_units)
+inputs = np.random.random(input_shape)
+hidden_state_t = np.zeros((hidden_units,))
 
-Wx_layer2 = np.random.random((hidden_units, input_dim))
-Wh_layer2 = np.random.random((hidden_units, hidden_units))
-bias_layer2 = np.random.random(hidden_units)
+print("초기 은닉 상태 : ", hidden_state_t)
 
-total_hidden_states_layer1 = []
-total_hidden_states_layer2 = []
+# wx = np.random.random((input_dim, hidden_units))
+# Wx = np.random.random((hidden_units, input_dim))
+
+wx = np.ones((input_dim, hidden_units))
+Wx = np.ones((hidden_units, input_dim))
+
+
+
+wh = np.random.random((hidden_units, hidden_units))
+bias_h = np.random.random((hidden_units,))
+
+hidden_states_list = []
+test_l = []
 
 for input in inputs:
+    output_t = np.tanh(np.dot(input, wx) + np.dot(hidden_state_t, wh) + bias_h)
+    test_state = np.tanh(np.dot(Wx, input) + np.dot(wh, hidden_state_t) + bias_h)
+    print(input)
+    print(wx)
+    print(np.dot(input, wx))
+    print('🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉🐲🐉')
 
-    calc_input = np.dot(Wx_layer1, input) + np.dot(Wh_layer1, hidden_states) + bias_layer1
-    hidden_state_t = np.dot(Wx_layer1, input) + np.dot(Wh_layer1, hidden_states)
-    output_t = np.tanh(calc_input)
-    total_hidden_states_layer1.append(output_t)
-    hidden_states = output_t
-
-print(total_hidden_states_layer1)
-
-
-
-
-# two layers rnn
-model2 = Sequential()
-model2.add(SimpleRNN(hidden_units, input_length=timesteps, input_dim=input_dim,
-                    return_sequences=True))
-model2.add(SimpleRNN(hidden_units, return_sequences=True))
-
+    print(input)
+    print(Wx)
+    print(np.dot(Wx, input))
+    break
+    # output_t = np.tanh(raw_hidden_state)
+    #
+    # hidden_states_list.append(output_t)
+    # test_l.append(test_state)
+    # hidden_state_t = output_t
 
 
-# bidirectional rnn
-input_dim2 = 5
-
-model3 = Sequential()
-model.add(Bidirectional(SimpleRNN(hidden_units, return_sequences=True),
-                        input_shape=(timesteps, input_dim2)))

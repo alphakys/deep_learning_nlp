@@ -30,8 +30,19 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 
+from nltk.tokenize import word_tokenize
+text = "what will the fat cat sit on"
+tokens = word_tokenize(text)
+texts = [text]
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(texts)
+word_to_index = tokenizer.word_index
+
+text_oh = tokenizer.texts_to_matrix(tokens)
+text_oh = text_oh[:,1::]
 
 
+print(text_oh)
 # cancer_data = load_breast_cancer()
 #
 # cancer_df = pd.DataFrame(data=cancer_data['data'], columns=cancer_data['feature_names'])
