@@ -9,8 +9,7 @@ from keras.optimizers import Adam
 from keras.layers import SimpleRNN, Bidirectional
 from numpy import tanh
 
-import pandas as df
-from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 
 model = Sequential()
 
