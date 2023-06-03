@@ -19,9 +19,10 @@ from decimal import Decimal
 from keras.layers import SimpleRNN, Bidirectional, LSTM
 from keras.layers import TextVectorization
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Inpu
+from keras.layers import Dense, Dropout, Activation
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences, to_categorical
+from keras.optimizers import Adam
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -49,10 +50,20 @@ tokens = word_tokenize(test_text)
 word_matrix = tk.texts_to_matrix(tokens)
 word_matrix = word_matrix[:,1::]
 train_X = word_matrix[:3]
+train_X = np.array(train_X)
+# train_X = np.array(train_X).reshape(-1, train_X.shape[0], train_X.shape[1])
+
 y = word_matrix[3]
 
+model = Sequential()
+# [STUDY] DEEP NEURAL NETWORK를 하고자 하면 return_sequences=True를 해줘야지 다음층으로 은닉층의 출력값이 넘어가게 된다.
+model.add(SimpleRNN(5, input_shape=train_X.shape, return_sequences=True))
+model.add(SimpleRNN(5, activation='tanh'))
+model.add(Dense(5, activation='softmax'))
 
-
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+model.fit(train_X, y, epochs=100, batch_size=1)
+model.evaluate(train_X, y)
 
 
 # cancer_data = load_breast_cancer()
