@@ -1,6 +1,8 @@
 import os
 import warnings
 
+from fontTools.misc.psOperators import ps_real
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -39,31 +41,48 @@ from nltk.tokenize import word_tokenize
 
 
 text = """경마장에 있는 말이 뛰고 있다\n그의 말이 법이다\n가는 말이 고와야 오는 말이 곱다"""
-test_text = text.split('\n')[0]
 
 tk = Tokenizer()
-tk.fit_on_texts([test_text])
+prepared_text = [text]
 
-from nltk.tokenize import word_tokenize
-tokens = word_tokenize(test_text)
+tk.fit_on_texts(prepared_text)
+splited_text = text.split('\n')
 
-word_matrix = tk.texts_to_matrix(tokens)
-word_matrix = word_matrix[:,1::]
-train_X = word_matrix[:3]
-train_X = np.array(train_X)
-# train_X = np.array(train_X).reshape(-1, train_X.shape[0], train_X.shape[1])
+vocab_size = list(tk.word_index.values())[-1] + 1
 
-y = word_matrix[3]
+text_sequences = [tk.texts_to_sequences([sen]) for sen in splited_text]
 
-model = Sequential()
-# [STUDY] DEEP NEURAL NETWORK를 하고자 하면 return_sequences=True를 해줘야지 다음층으로 은닉층의 출력값이 넘어가게 된다.
-model.add(SimpleRNN(5, input_shape=train_X.shape, return_sequences=True))
-model.add(SimpleRNN(5, activation='tanh'))
-model.add(Dense(5, activation='softmax'))
+train_X = [to_categorical(seq, vocab_size)[:, :, 1::] for seq in text_sequences]
 
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-model.fit(train_X, y, epochs=100, batch_size=1)
-model.evaluate(train_X, y)
+
+
+
+
+# test_text = text.split('\n')[0]
+#
+# tk = Tokenizer()
+# tk.fit_on_texts([test_text])
+#
+# from nltk.tokenize import word_tokenize
+# tokens = word_tokenize(test_text)
+#
+# word_matrix = tk.texts_to_matrix(tokens)
+# word_matrix = word_matrix[:,1::]
+# train_X = word_matrix[:3]
+# train_X = np.array(train_X)
+# # train_X = np.array(train_X).reshape(-1, train_X.shape[0], train_X.shape[1])
+#
+# y = word_matrix[3]
+#
+# model = Sequential()
+# # [STUDY] DEEP NEURAL NETWORK를 하고자 하면 return_sequences=True를 해줘야지 다음층으로 은닉층의 출력값이 넘어가게 된다.
+# model.add(SimpleRNN(5, input_shape=train_X.shape, return_sequences=True))
+# model.add(SimpleRNN(5, activation='tanh'))
+# model.add(Dense(5, activation='softmax'))
+#
+# model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+# model.fit(train_X, y, epochs=100, batch_size=1)
+# model.evaluate(train_X, y)
 
 
 # cancer_data = load_breast_cancer()
