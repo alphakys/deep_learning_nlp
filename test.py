@@ -19,10 +19,9 @@ from decimal import Decimal
 from keras.layers import SimpleRNN, Bidirectional, LSTM
 from keras.layers import TextVectorization
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
+from keras.layers import Dense, Dropout, Activation, Inpu
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences, to_categorical
-
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -31,17 +30,28 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 
-
-
-
-
-
-
-
+from nltk.tokenize import word_tokenize
 
 # [STUDY] to_categorical 함수는 정수형 클래스 레이블을 one hot encoding 벡터로 변환하는 함수입니다.
 # to_categorical 함수는 정수형 클래스 레이블을 one hot encoding 벡터로 변환하는 함수입니다.
 # to_categorical 함수는 정수형 클래스 레이블을 one hot encoding 벡터로 변환하는 함수입니다.
+
+
+text = """경마장에 있는 말이 뛰고 있다\n그의 말이 법이다\n가는 말이 고와야 오는 말이 곱다"""
+test_text = text.split('\n')[0]
+
+tk = Tokenizer()
+tk.fit_on_texts([test_text])
+
+from nltk.tokenize import word_tokenize
+tokens = word_tokenize(test_text)
+
+word_matrix = tk.texts_to_matrix(tokens)
+word_matrix = word_matrix[:,1::]
+train_X = word_matrix[:3]
+y = word_matrix[3]
+
+
 
 
 
@@ -90,11 +100,6 @@ from sklearn.metrics import confusion_matrix
 # lr.fit()
 
 
-
-
-
-
-
 # sentence = 'What wii the fat cat sit on'
 #
 # from keras.preprocessing.text import text_to_word_sequence
@@ -120,8 +125,6 @@ from sklearn.metrics import confusion_matrix
 # plt.plot(a, y, 'r')
 # plt.plot(y, a, 'r')
 # plt.plot(y, a, 'b')
-
-
 
 
 # 로짓함수와 로지스틱 함수의 관계 및 로지스틱 회귀분석에 대한 전반적인 이해
