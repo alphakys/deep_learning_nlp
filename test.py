@@ -54,7 +54,15 @@ text_sequences = [tk.texts_to_sequences([sen]) for sen in splited_text]
 
 train_X = [to_categorical(seq, vocab_size)[:, :, 1::] for seq in text_sequences]
 
+time_steps = []
+y = []
+j = 1
+while(j < 5):
+    time_steps.append(text_sequences[0][0][:j])
+    y.append(text_sequences[0][0][j])
+    j +=1
 
+inputs = pad_sequences(time_steps, padding='post')
 
 
 
