@@ -1,8 +1,6 @@
 import os
 import warnings
 
-from fontTools.misc.psOperators import ps_real
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -49,6 +47,7 @@ splited_text = text.split('\n')
 vocab_size = list(tk.word_index.values())[-1] + 1
 
 text_sequences = [tk.texts_to_sequences([sen]) for sen in splited_text]
+index_to_word = {v:k for k,v in tk.word_index.items()}
 
 train_X = [to_categorical(seq, vocab_size)[:, :, 1::] for seq in text_sequences]
 
@@ -57,27 +56,37 @@ y = []
 j = 1
 while j < 5:
     tmp = text_sequences[0][0][:j]
-    tmp = (np.array(tmp))
-    tmp = tmp.reshape(-1, 1)
     y.append(text_sequences[0][0][j])
     time_steps.append(tmp)
     j += 1
 
-y = np.array(y).reshape(4, 1)
+train_y = to_categorical(y, vocab_size)
 
-inputs = pad_sequences(time_steps, padding='post')
-inputs = inputs.reshape(4, 1, 4)
-inputs = inputs.astype('float32')
+padded_seq = pad_sequences(time_steps)
+padded_seq = pad_sequences(time_steps, padding='post')
+expanded_timesteps = np.expand_dims(padded_seq, axis=0).reshape(4, 4, -1)
 
+oh_time_steps = to_categorical(expanded_timesteps, vocab_size)
+oh_time_steps[:, :, 0].fill(0)
+
+true_word = [index_to_word[index] for index in y]
+test_words = [index_to_word[t] for t in text_sequences[0][0]]
+
+inputs = oh_time_steps
 model = Sequential()
-model.add(SimpleRNN(5, input_shape=(1, 4), return_sequences=True))
-model.add(SimpleRNN(5, activation='tanh'))
-model.add(Dense(4, activation='softmax'))
+model.add(SimpleRNN(100, input_shape=inputs.shape[1::], return_sequences=True))
+model.add(SimpleRNN(200, activation='tanh'))
+model.add(Dense(vocab_size, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(inputs, y, epochs=1500, batch_size=1)
+history = model.fit(inputs, train_y, epochs=50, batch_size=2)
 
-print(history)
+def get_true(index):
+    print(f"테스트 단어 : \n{test_words[index]}")
+    true_idx = np.argmax(model.predict(np.expand_dims(inputs[index], axis=0), verbose=False))
+    print(f"예측 단어 : \n{index_to_word[true_idx]}")
+
+
 
 # input_tensor = Input(shape=inputs.shape)
 
