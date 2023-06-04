@@ -18,10 +18,8 @@ from pandas import DataFrame
 
 from keras.datasets import mnist
 from decimal import Decimal
-from keras.layers import SimpleRNN, Bidirectional, LSTM
-from keras.layers import TextVectorization
+from keras.layers import SimpleRNN, Bidirectional, LSTM, TextVectorization, Dense, Dropout, Activation, Input
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences, to_categorical
 from keras.optimizers import Adam
@@ -57,14 +55,31 @@ train_X = [to_categorical(seq, vocab_size)[:, :, 1::] for seq in text_sequences]
 time_steps = []
 y = []
 j = 1
-while(j < 5):
-    time_steps.append(text_sequences[0][0][:j])
+while j < 5:
+    tmp = text_sequences[0][0][:j]
+    tmp = (np.array(tmp))
+    tmp = tmp.reshape(-1, 1)
     y.append(text_sequences[0][0][j])
-    j +=1
+    time_steps.append(tmp)
+    j += 1
+
+y = np.array(y).reshape(4, 1)
 
 inputs = pad_sequences(time_steps, padding='post')
+inputs = inputs.reshape(4, 1, 4)
+inputs = inputs.astype('float32')
 
+model = Sequential()
+model.add(SimpleRNN(5, input_shape=(1, 4), return_sequences=True))
+model.add(SimpleRNN(5, activation='tanh'))
+model.add(Dense(4, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+history = model.fit(inputs, y, epochs=1500, batch_size=1)
+
+print(history)
+
+# input_tensor = Input(shape=inputs.shape)
 
 # test_text = text.split('\n')[0]
 #
@@ -83,7 +98,7 @@ inputs = pad_sequences(time_steps, padding='post')
 # y = word_matrix[3]
 #
 # model = Sequential()
-# # [STUDY] DEEP NEURAL NETWORK를 하고자 하면 return_sequences=True를 해줘야지 다음층으로 은닉층의 출력값이 넘어가게 된다.
+#   [STUDY] DEEP NEURAL NETWORK를 하고자 하면 return_sequences=True를 해줘야지 다음층으로 은닉층의 출력값이 넘어가게 된다.
 # model.add(SimpleRNN(5, input_shape=train_X.shape, return_sequences=True))
 # model.add(SimpleRNN(5, activation='tanh'))
 # model.add(Dense(5, activation='softmax'))
