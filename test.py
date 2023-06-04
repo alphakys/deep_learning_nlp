@@ -47,9 +47,11 @@ splited_text = text.split('\n')
 vocab_size = list(tk.word_index.values())[-1] + 1
 
 text_sequences = [tk.texts_to_sequences([sen]) for sen in splited_text]
+max_len = max([len(text[0]) for text in text_sequences])
+pad_sequences = [pad_sequences(text, maxlen=max_len, padding='post') for text in text_sequences]
+
 index_to_word = {v:k for k,v in tk.word_index.items()}
 
-train_X = [to_categorical(seq, vocab_size)[:, :, 1::] for seq in text_sequences]
 
 time_steps = []
 y = []
