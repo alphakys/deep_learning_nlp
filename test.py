@@ -9,7 +9,6 @@ import tensorflow as tf
 
 import matplotlib.pyplot as plt
 
-from sklearn.cluster import KMeans
 
 import pandas as pd
 from pandas import DataFrame
@@ -48,47 +47,60 @@ vocab_size = list(tk.word_index.values())[-1] + 1
 
 text_sequences = [tk.texts_to_sequences([sen]) for sen in splited_text]
 max_len = max([len(text[0]) for text in text_sequences])
-pad_sequences = [pad_sequences(text, maxlen=max_len, padding='post') for text in text_sequences]
+padded_sequences = [pad_sequences(text, maxlen=max_len, padding='post') for text in text_sequences]
 
-index_to_word = {v:k for k,v in tk.word_index.items()}
+index_to_word = {v: k for k, v in tk.word_index.items()}
 
+train_X = []
+train_y = []
+for seq in padded_sequences:
+    j = 1
+    cnt = len(seq[0])
+    tmp = seq[0]
+    while j < cnt:
+        train_y.append(tmp[j])
+        train_X.append(tmp[:j])
+        j += 1
 
-time_steps = []
-y = []
-j = 1
-while j < 5:
-    tmp = text_sequences[0][0][:j]
-    y.append(text_sequences[0][0][j])
-    time_steps.append(tmp)
-    j += 1
+train_oh_label = to_categorical(train_y)
 
-train_y = to_categorical(y, vocab_size)
+max_step = max([len(x) for x in train_X])
+tmp_list = [pad_sequences([x], maxlen=max_step, padding='post')[0] for x in train_X]
+tmp_len = len(tmp_list)
+k = 2
 
-padded_seq = pad_sequences(time_steps)
-padded_seq = pad_sequences(time_steps, padding='post')
-expanded_timesteps = np.expand_dims(padded_seq, axis=0).reshape(4, 4, -1)
-
-oh_time_steps = to_categorical(expanded_timesteps, vocab_size)
-oh_time_steps[:, :, 0].fill(0)
-
-true_word = [index_to_word[index] for index in y]
-test_words = [index_to_word[t] for t in text_sequences[0][0]]
-
-inputs = oh_time_steps
-model = Sequential()
-model.add(SimpleRNN(100, input_shape=inputs.shape[1::], return_sequences=True))
-model.add(SimpleRNN(200, activation='tanh'))
-model.add(Dense(vocab_size, activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-history = model.fit(inputs, train_y, epochs=50, batch_size=2)
-
-def get_true(index):
-    print(f"테스트 단어 : \n{test_words[index]}")
-    true_idx = np.argmax(model.predict(np.expand_dims(inputs[index], axis=0), verbose=False))
-    print(f"예측 단어 : \n{index_to_word[true_idx]}")
+stacked_list = np.vstack((tmp_list[0], tmp_list[1]))
+while k < tmp_len:
+    stacked_list = np.vstack((stacked_list, tmp_list[k]))
+    k += 1
 
 
+# train_y = to_categorical(y, vocab_size)
+#
+# padded_seq = pad_sequences(time_steps)
+# padded_seq = pad_sequences(time_steps, padding='post')
+# expanded_timesteps = np.expand_dims(padded_seq, axis=0).reshape(4, 4, -1)
+#
+# oh_time_steps = to_categorical(expanded_timesteps, vocab_size)
+# oh_time_steps[:, :, 0].fill(0)
+#
+# true_word = [index_to_word[index] for index in y]
+# test_words = [index_to_word[t] for t in text_sequences[0][0]]
+#
+# inputs = oh_time_steps
+# model = Sequential()
+# model.add(SimpleRNN(100, input_shape=inputs.shape[1::], return_sequences=True))
+# model.add(SimpleRNN(200, activation='tanh'))
+# model.add(Dense(vocab_size, activation='softmax'))
+# model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+#
+# history = model.fit(inputs, train_y, epochs=50, batch_size=2)
+#
+#
+# def get_true(index):
+#     print(f"테스트 단어 : \n{test_words[index]}")
+#     true_idx = np.argmax(model.predict(np.expand_dims(inputs[index], axis=0), verbose=False))
+#     print(f"예측 단어 : \n{index_to_word[true_idx]}")
 
 # input_tensor = Input(shape=inputs.shape)
 
