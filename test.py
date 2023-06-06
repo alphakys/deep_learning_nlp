@@ -9,7 +9,6 @@ import tensorflow as tf
 
 import matplotlib.pyplot as plt
 
-
 import pandas as pd
 from pandas import DataFrame
 
@@ -74,33 +73,31 @@ while k < tmp_len:
     stacked_list = np.vstack((stacked_list, tmp_list[k]))
     k += 1
 
+train_X = to_categorical(stacked_list, num_classes=vocab_size)
+train_oh_label[:, 0].fill(0)
 
-# train_y = to_categorical(y, vocab_size)
-#
-# padded_seq = pad_sequences(time_steps)
-# padded_seq = pad_sequences(time_steps, padding='post')
-# expanded_timesteps = np.expand_dims(padded_seq, axis=0).reshape(4, 4, -1)
-#
-# oh_time_steps = to_categorical(expanded_timesteps, vocab_size)
-# oh_time_steps[:, :, 0].fill(0)
-#
-# true_word = [index_to_word[index] for index in y]
-# test_words = [index_to_word[t] for t in text_sequences[0][0]]
-#
-# inputs = oh_time_steps
-# model = Sequential()
-# model.add(SimpleRNN(100, input_shape=inputs.shape[1::], return_sequences=True))
-# model.add(SimpleRNN(200, activation='tanh'))
-# model.add(Dense(vocab_size, activation='softmax'))
-# model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-#
-# history = model.fit(inputs, train_y, epochs=50, batch_size=2)
-#
-#
-# def get_true(index):
-#     print(f"테스트 단어 : \n{test_words[index]}")
-#     true_idx = np.argmax(model.predict(np.expand_dims(inputs[index], axis=0), verbose=False))
-#     print(f"예측 단어 : \n{index_to_word[true_idx]}")
+true_word = [index_to_word[index] for index in train_y if index != 0]
+test_words = []
+for s in stacked_list:
+    test_words.append([t for t in s if t!=0])
+
+inputs = train_X
+inputs[:, :, 0].fill(0)
+
+model = Sequential()
+model.add(SimpleRNN(200, input_shape=inputs.shape[1::], return_sequences=True))
+model.add(SimpleRNN(300, activation='tanh'))
+model.add(Dense(vocab_size, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.0002), metrics=['accuracy'])
+
+history = model.fit(inputs, train_oh_label, epochs=300, batch_size=1)
+
+def get_true(index):
+
+    true_idx = np.argmax(model.predict(np.expand_dims(inputs[index], axis=0), verbose=False))
+    print(f"테스트 단어 : {[index_to_word[txt] for txt in test_words[index]]}\n\n")
+    print(f"예측 단어 : {index_to_word[true_idx]}")
+
 
 # input_tensor = Input(shape=inputs.shape)
 
