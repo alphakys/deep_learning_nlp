@@ -33,6 +33,8 @@ for seq in sequences[:3]:
     for i in range(2, cnt):
         encoded_list.append(seq[:i])
 
-
-
 max_len = max([len(seq) for seq in sequences])
+padded_sequences = pad_sequences(encoded_list)
+
+X = padded_sequences[:, :-1]
+y = padded_sequences[:, -1]
