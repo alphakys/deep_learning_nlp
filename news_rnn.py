@@ -11,7 +11,9 @@ from string import punctuation
 from keras.optimizers import Adam
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences, to_categorical
-from keras.layers import Dense, Embedding, LSTM
+from keras.layers import Dense, Embedding, LSTM, SimpleRNN
+from keras.models import Sequential
+
 
 news_pd: pd.DataFrame = pd.read_csv('ArticlesJan2018.csv')
 
@@ -38,6 +40,14 @@ padded_sequences = pad_sequences(encoded_list)
 
 X = padded_sequences[:, :-1]
 y = padded_sequences[:, -1]
+
+model = Sequential()
+
+embedding_size = 10
+
+
+
+model.add()
 
 def predict_word(model, tk, search: str, n: int):
     
