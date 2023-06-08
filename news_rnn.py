@@ -38,3 +38,30 @@ padded_sequences = pad_sequences(encoded_list)
 
 X = padded_sequences[:, :-1]
 y = padded_sequences[:, -1]
+
+def predict_word(model, tk, search: str, n: int):
+    
+    # tokenizer에서 lower로 변환하기 때문에 마찬가지로 lower 함수를 써서 convert한다.
+    test_index = tk.word_index[search.lower()]
+    # 검색된 리스트 중에서 첫번째를 테스트 sentence로 한다.
+    index_arr = [s for s in sequences if test_index in s][0]
+
+    # maxx = len(index_arr)
+
+    # print(index)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
