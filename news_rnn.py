@@ -50,7 +50,7 @@ for seq in sequences:
 max_len = max([len(seq) for seq in sequences])
 padded_sequences = pad_sequences(encoded_list)
 
-X = padded_sequences[:, :-1].astype('float32')
+X = padded_sequences[:, :-1]
 y = padded_sequences[:, -1]
 # !!! y one hot encoding을 수행한다.
 y = to_categorical(y, num_classes=vocab_size)
