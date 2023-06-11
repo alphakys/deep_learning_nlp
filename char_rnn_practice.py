@@ -31,23 +31,71 @@ f.close()
 
 # [STUDY] 하나 배움 .join()!!!!
 raw_sentences = ' '.join(sentences_list)
-# raw_sentences = ' '.join(sentences[:100])
-
-test_t = sentences_list[:10]
-
-
 
 tk = Tokenizer(filters='')
 tk.fit_on_texts(raw_sentences)
 
+word = 'apple'
 
-# array([[   0,    0,    0, ...,    0,    0,  773],
-#        [   0,    0,    0, ...,    0,  773,    4],
-#        [   0,    0,    0, ...,  773,    4,    1],
-#        ...,
-#        [   0,    0,    0, ...,    0,  208,  537],
-#        [   0,    0,    0, ...,  208,  537,  385],
-#        [   0,    0,    0, ...,  537,  385, 2592]], dtype=int32)
-# headline_list[:3]
-# ['Rhythm of the Streets: ‘We’re Warrior Women, and Yes, We Can Play’',
-# 'As Deficit Grows, Congress Keeps Spending', 'Lesson in Select Bus Service']
+train_X = 'appl'
+train_y = 'pple'
+
+
+
+
+
+#
+# vocab_size = len(tk.word_index) + 1
+#
+# sequences = []
+# for text in sentences_list:
+#     split_text = text.split(' ')
+#     sequence = [tk.texts_to_sequences(text) for text in split_text]
+#     for seq in sequence:
+#         tmp_seq = np.array(seq).flatten()
+#         sequences.append(tmp_seq)
+#
+# max_len = max([len(seq) for seq in sequences])
+# padded_sequences = pad_sequences(sequences, maxlen=max_len, padding='pre')
+#
+# X = padded_sequences[:, :-1]
+# y = padded_sequences[:, -1]
+# y = to_categorical(y, num_classes=vocab_size)
+#
+# # [STUDY] Embedding layer는 input_dim, output_dim이 중요하다.
+# #   output_dim은 Dense layer의 unit과 같다. -> 하나의 단어에 대해서 몇개의 multiverse를 가질 것인가의 개념
+# #   input_dim은 inputs data의 총 단어수의 + 1 즉 vocab_size와 같아야한다.
+# #   embedding layer는 Dense()에 activation이 linear인 layer와 같다. API이기 때문에 쉽게 사용할 수 있도록 만들어진 함수에 불과함
+# #   결국! 주어진 input 데이터에 weights를 곱하여 embedding layer를 만드는데 가장 핵심적인 부분은
+# #   input_dimentioality이다. 왜냐하면 input_shape=(10, 5) 이면 weights는 (5, output_dim)이기 때문에
+# #   input_dim이 5로 동일하든지 그 보다 작아야만 한다.
+#
+# embedding_dim = 10
+# hidden_units = 128
+#
+# model = Sequential()
+# # embedding에 input_length == input_dim과 같다.
+# # !!! [STUDY] embedding layer에서 내가 vocab_size 만큼 input_dim을 늘려주지 않아도 알아서 처리한다.
+# model.add(Embedding(vocab_size, embedding_dim))
+# model.add(LSTM(hidden_units))
+# model.add(Dense(units=vocab_size, activation='softmax'))
+# model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+# history = model.fit(X, y, epochs=10, batch_size=16)
+#
+#
+# def predict_word(model, tk, n: int):
+#     pred_sentence = ''
+#     rand = np.random.randint(1, vocab_size)
+#     rand_word = tk.index_word[rand]
+#
+#     print(f"random word => {rand_word}")
+#     curr_word = rand_word
+#     for i in range(n):
+#         test_input = pad_sequences(tk.texts_to_sequences([curr_word]), maxlen=max_len - 1, padding='pre')
+#         prd = model(test_input)
+#         pred_idx = np.argmax(prd)
+#         pred_char = tk.index_word[pred_idx]
+#
+#         pred_sentence += pred_char
+#         curr_word = pred_char
+#     return pred_sentence
