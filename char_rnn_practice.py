@@ -13,7 +13,7 @@ from keras.optimizers import Adam
 from keras.preprocessing.text import Tokenizer
 
 from keras.utils import pad_sequences, to_categorical
-from keras.layers import Dense, Embedding, LSTM, SimpleRNN, TextVectorization
+from keras.layers import Dense, Embedding, LSTM, SimpleRNN, TextVectorization, TimeDistributed
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -32,13 +32,48 @@ f.close()
 # [STUDY] 하나 배움 .join()!!!!
 raw_sentences = ' '.join(sentences_list)
 
-tk = Tokenizer(filters='')
-tk.fit_on_texts(raw_sentences)
+char_vocab = sorted(list(set(raw_sentences)))
+vocab_size = len(char_vocab)
 
-word = 'apple'
+char_to_index = dict((char, index) for index, char in enumerate(char_vocab))
 
-train_X = 'appl'
-train_y = 'pple'
+index_to_char = {}
+for key, value in char_to_index.items():
+    index_to_char[value] = key
+
+seq_length = 60
+
+# 문자열의 길이를 seq_length로 나누면 전처리 후 생겨날 샘플 수
+n_samples = int(np.floor((len(raw_sentences) - 1) / seq_length))
+
+train_X = []
+train_y = []
+
+for i in range(n_samples):
+    # 0:60 -> 60:120 -> 120:180로 loop를 돌면서 문장 샘플을 1개씩 pick.
+    X_sample = raw_sentences[i * seq_length: (i + 1) * seq_length]
+
+    # 정수 인코딩
+    X_encoded = [char_to_index[c] for c in X_sample]
+    train_X.append(X_encoded)
+
+    # 오른쪽으로 1칸 쉬프트
+    y_sample = raw_sentences[i * seq_length + 1: (i + 1) * seq_length + 1]
+    y_encoded = [char_to_index[c] for c in y_sample]
+    train_y.append(y_encoded)
+
+train_X = to_categorical(train_X)
+train_y = to_categorical(train_y)
+
+hidden_units = 256
+
+model = Sequential()
+model.add(LSTM(hidden_units, input_shape=(None, train_X.shape[2]), return_sequences=True))
+model.add(LSTM(hidden_units, return_sequences=True))
+model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
+
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.fit(train_X, train_y, epochs=80, verbose=1)
 
 
 
