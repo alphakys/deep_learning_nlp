@@ -16,6 +16,7 @@ from keras.utils import pad_sequences, to_categorical
 from keras.layers import Dense, Embedding, LSTM, SimpleRNN, TextVectorization, TimeDistributed
 from keras.models import Sequential
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.models import load_model
 
 f = open('11-0.txt', 'rb')
 sentences_list = []
@@ -40,6 +41,29 @@ char_to_index = dict((char, index) for index, char in enumerate(char_vocab))
 index_to_char = {}
 for key, value in char_to_index.items():
     index_to_char[value] = key
+
+model = load_model('char_rnn.h5', compile=False)
+
+def sentence_generation(model, length):
+    # 문자에 대한 랜덤한 정수 생성
+    ix = [np.random.randint(vocab_size)]
+
+    # 랜덤한 정수로부터 맵핑되는 문자 생성
+    y_char = [index_to_char[ix[-1]]]
+    print(ix[-1],'번 문자',y_char[-1],'로 예측을 시작!')
+
+    # (1, length, 55) 크기의 X 생성. 즉, LSTM의 입력 시퀀스 생성
+    X = np.zeros((1, length, vocab_size))
+
+    for i in range(length):
+        # X[0][i][예측한 문자의 인덱스] = 1, 즉, 예측 문자를 다음 입력 시퀀스에 추가
+        X[0][i][ix[-1]] = 1
+        print(index_to_char[ix[-1]], end="")
+        ix = np.argmax(model.predict(X[:, :i+1, :])[0], 1)
+        y_char.append(index_to_char[ix[-1]])
+    return ('').join(y_char)
+
+
 
 seq_length = 60
 
@@ -74,9 +98,6 @@ model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.fit(train_X, train_y, epochs=80, verbose=1)
-
-
-
 
 
 #
