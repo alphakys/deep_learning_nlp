@@ -43,3 +43,27 @@ sentences = ' '.join(tokens)
 
 index_to_char = {idx: v for idx, v in enumerate(sorted(list(set(sentences))))}
 char_to_index = {v: idx for idx, v in enumerate(sorted(list(set(sentences))))}
+
+char_size = len(char_to_index) + 1
+
+cnt = len(sentences)
+sep_length = 10
+preprocessing_X = []
+for _ in range(cnt):
+    sep_arr = sentences[_:sep_length + _]
+    preprocessing_X.append([char_to_index[char] for char in sep_arr])
+
+train_X = pad_sequences(preprocessing_X)[:, :-1]
+y = pad_sequences(preprocessing_X)[:, -1]
+
+y = to_categorical(y, num_classes=char_size)
+
+embedding_output_dim = 40
+hidden_units = 256
+
+model = Sequential()
+model.add(Embedding(char_size, embedding_output_dim))
+model.add(LSTM(hidden_units))
+model.add(Dense(units=char_size, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
+model.fit(train_X, y, epochs=80)
