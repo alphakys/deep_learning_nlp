@@ -67,3 +67,22 @@ model.add(LSTM(hidden_units))
 model.add(Dense(units=char_size, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
 model.fit(train_X, y, epochs=80)
+
+
+def sentence_generation(epochs=10):
+    input_dim = 9
+    start = np.random.randint(428)
+
+    test_X = np.zeros(shape=(input_dim + epochs, input_dim))
+    test_sen = sentences[start:start+input_dim]
+    test_char = [char_to_index[char] for char in test_sen]
+
+    prd_sentence = test_sen
+    for i in range(epochs):
+
+        test_sentence = np.expand_dims(test_char, axis=0)
+        prd = np.argmax(model(test_sentence))
+        prd_sentence += index_to_char[prd]
+        np.append(test_sentence[0], prd)[1::]
+
+    return prd_sentence
