@@ -46,13 +46,13 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 
 # urllib.request.urlretrieve("https://raw.githubusercontent.com/e9t/nsmc/master/ratings.txt", filename="ratings.txt")
 
-import pandas as pd
-
-naver_pd = pd.read_table('ratings.txt')
-
-from gensim.models import Word2Vec
-
-
-model = Word2Vec(sentences=tokenized_data, vector_size=100,
-                 window=5, min_count=5, workers=4, sg=0)
+# import pandas as pd
+#
+# naver_pd = pd.read_table('ratings.txt')
+#
+# from gensim.models import Word2Vec
+#
+#
+# model = Word2Vec(sentences=tokenized_data, vector_size=100,
+#                  window=5, min_count=5, workers=4, sg=0)
 
