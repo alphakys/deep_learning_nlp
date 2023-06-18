@@ -20,3 +20,7 @@ news_df['clean_doc'] = news_df['document'].str.replace("[^a-zA-Z]", " ")
 
 news_df['clean_doc'] = news_df['clean_doc'].apply(
     lambda x: ' '.join([word.lower() for word in x.split() if len(word) > 3]))
+
+# news_df.dropna(inplace=True)
+
+from keras.preprocessing.sequence import skipgrams
