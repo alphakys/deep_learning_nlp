@@ -44,4 +44,45 @@ index_to_word = tk.index_word
 encoded = tk.texts_to_sequences(tokenized_doc)
 vocab_size = len(tk.word_index) + 1
 
-skip_grams = [skipgrams(sample, vocabulary_size=vocab_size, window_size=10) for sample in encoded[:10]]
+skip_grams = [skipgrams(sample, vocabulary_size=vocab_size, window_size=10) for sample in encoded]
+
+from keras.models import Sequential, Model
+from keras.layers import Embedding, Reshape, Activation, Input
+from keras.layers import Dot
+from keras.utils import plot_model
+from IPython.display import SVG
+
+embedding_dim = 100
+
+# 중심단어를 위한 임베딩 테이블 -> 중심단어(label이 1인 단어 pair)
+w_inputs = Input(shape=(1,), dtype='int32')
+# call을 통해 Input을 통해 설정한 config를 주입한다.
+word_embedding = Embedding(vocab_size, embedding_dim)(w_inputs)
+
+# 주변단어를 위한 임베딩 테이블 -> 주변단어(label이 0인 단어 pair)
+c_inputs = Input(shape=(1,), dtype='int32')
+context_embedding = Embedding(vocab_size, embedding_dim)(c_inputs)
+
+dot_product = Dot()
+
+
+
+
+
+
+
+
+
+
+# from collections import Counter
+
+# gram1_to_word = [[index_to_word[w] for w in l] for l in skip_grams[0][0]]
+#
+# flatten_list = []
+# [flatten_list.extend(word_l) for word_l in gram1_to_word]
+#
+# counter_token_doc = Counter(tokenized_doc[0])
+# counter_gram1 = Counter(flatten_list)
+#
+# for k, v in counter_token_doc.items():
+#     counter_token_doc[k] = (v, counter_gram1[k])

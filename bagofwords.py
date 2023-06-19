@@ -50,6 +50,7 @@ vocab.sort()
 
 N = len(docs)
 
+
 def tf(term, d):
     return d.count(term)
 
