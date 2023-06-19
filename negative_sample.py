@@ -63,7 +63,8 @@ word_embedding = Embedding(vocab_size, embedding_dim)(w_inputs)
 c_inputs = Input(shape=(1,), dtype='int32')
 context_embedding = Embedding(vocab_size, embedding_dim)(c_inputs)
 
-dot_product = Dot()
+# [STUDY] Dot(axes=(a1, a2))[x, y] => x tensor의 a1번째 dimension과 y tensor의 a2번재 dimension을 dot product 연산하는 것!!
+
 
 
 
