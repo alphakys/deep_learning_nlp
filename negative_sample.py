@@ -4,6 +4,7 @@ import warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+
 import numpy as np
 from keras.preprocessing.sequence import skipgrams
 
@@ -64,11 +65,25 @@ c_inputs = Input(shape=(1,), dtype='int32')
 context_embedding = Embedding(vocab_size, embedding_dim)(c_inputs)
 
 # [STUDY] Dot(axes=(a1, a2))[x, y] => x tensor의 a1번째 dimension과 y tensor의 a2번재 dimension을 dot product 연산하는 것!!
+dot_product = Dot(axes=2)([word_embedding, context_embedding])
+dot_product = Reshape((1,), input_shape=(1, 1))(dot_product)
+output = Activation('sigmoid')(dot_product)
 
+model = Model(inputs=[w_inputs, c_inputs], outputs=output)
+model.summary()
+model.compile(loss='binary_crossentropy', optimizer='adam')
+# plot_model(model, to_file='model3.png', show_shapes=True, show_layer_names=True, rankdir='TB')
 
-
-
-
+for epoch in range(1, 6):
+    loss = 0
+    for _, elem in enumerate(skip_grams):
+        first_elem = np.array(list(zip(*elem[0]))[0], dtype='int32')
+        second_elem = np.array(list(zip(*elem[0]))[1], dtype='int32')
+        labels = np.array(elem[1], dtype='int32')
+        X = [first_elem, second_elem]
+        y = labels
+        loss += model.train_on_batch(X, y)
+    print('Epoch :',epoch, 'Loss :', loss)
 
 
 
