@@ -99,21 +99,14 @@ def get_document_vectors(document_list):
 document_embedding_list = get_document_vectors(df['cleaned'])
 cosine_similarities = cosine_similarity(document_embedding_list, document_embedding_list)
 
-
 def recommendations(title):
     library = {v: k for k, v in df['title'].iteritems()}
     bookof_idx = library[title]
 
     book_sim = {v: df['title'][idx] for idx, v in enumerate(cosine_similarities[bookof_idx]) if idx != 2017}
+    # [STUDY] dict를 정렬하기 위해선 items()를 사용해야 한다.
+    book_sim = sorted(book_sim.items(), reverse=True)
 
-    return sorted(book_sim)
-
-
-
-
-
-
-
-
+    return book_sim[:5][1]
 
 
