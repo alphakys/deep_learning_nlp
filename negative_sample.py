@@ -82,7 +82,7 @@ for epoch in range(1, 6):
         labels = np.array(elem[1], dtype='int32')
         X = [first_elem, second_elem]
         y = labels
-        loss += model.train_on_batch(X, y)
+        loss += model.train_on_batch(X, y)d
     print('Epoch :',epoch, 'Loss :', loss)
 
 

@@ -14,6 +14,6 @@ from tqdm import tqdm
 
 df = pd.read_csv('~/문서/dart.csv')
 for k, v in enumerate(df.iterrows()):
-    if k <10:
+    if k < 10:
         TaggedDocument
-        print(k,v[1][['name', 'business']])
+        print(k, v[1][['name', 'business']])
