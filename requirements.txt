@@ -1,2 +1,4 @@
 pip install ydata-profiling
 sudo apt install default-jdk
+# tensorflow install binary version
+bazel build -c opt --copt=-march=native --define=with_xla_support=true --define=no_aws_support=true --define=no_hdfs_support=true --define=no_nccl_support=true --define=no_gcp_support=true --host_copt=-w --local_ram_resources=6048 //tensorflow/tools/pip_package:build_pip_package
