@@ -33,3 +33,66 @@ test_data = test_data.dropna(how='any')  # Null 값 제거
 
 stopwords = ['도', '는', '다', '의', '가', '이', '은', '한', '에', '하', '고', '을', '를', '인', '듯', '과', '와', '네', '들', '듯', '지',
              '임', '게', '만', '게임', '겜', '되', '음', '면']
+
+mecab = Mecab()
+
+train_data['tokenized'] = train_data['reviews'].apply(lambda x: mecab.morphs(x))
+train_data['tokenized'] = [token for token in train_data['tokenized'] if token not in stopwords]
+test_data['tokenized'] = test_data['reviews'].apply(lambda x: mecab.morphs(x))
+test_data['tokenized'] = [token for token in test_data['tokenized'] if token not in stopwords]
+
+negative_words = np.hstack(train_data[train_data.label == 0]['tokenized'].values)
+positive_words = np.hstack(train_data[train_data.label == 1]['tokenized'].values)
+
+X_train = train_data['tokenized'].values
+y_train = train_data['label'].values
+X_test= test_data['tokenized'].values
+y_test = test_data['label'].values
+
+tk = Tokenizer()
+tk.fit_on_texts(X_train)
+
+threshold = 2
+total_cnt = len(tk.word_index) # 단어의 수
+rare_cnt = 0 # 등장 빈도수가 threshold보다 작은 단어의 개수를 카운트
+total_freq = 0 # 훈련 데이터의 전체 단어 빈도수 총 합
+rare_freq = 0 # 등장 빈도수가 threshold보다 작은 단어의 등장 빈도수의 총 합
+
+# 단어와 빈도수의 쌍(pair)을 key와 value로 받는다.
+for key, value in tk.word_counts.items():
+    total_freq = total_freq + value
+
+    # 단어의 등장 빈도수가 threshold보다 작으면
+    if(value < threshold):
+        rare_cnt = rare_cnt + 1
+        rare_freq = rare_freq + value
+
+vocab_size = total_cnt - rare_cnt + 2
+max_len = 60
+
+X_train = pad_sequences(X_train, maxlen=max_len)
+X_test = pad_sequences(X_test, maxlen=max_len)
+
+import re
+from keras.layers import Embedding, Dense, LSTM, Bidirectional
+from keras.models import Sequential
+from keras.models import load_model
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+embedding_dim = 100
+hidden_units = 128
+model = Sequential()
+model.add(Embedding(vocab_size, embedding_dim))
+model.add(Bidirectional(LSTM(hidden_units)))
+
+model.add(Dense(1, activation='sigmoid'))
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
+model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
+history = model.fit(X_train, y_train, epochs=15, callbacks=[es], batch_size=128, validation_split=0.2)
+
+
+
+
+
+
+
+
