@@ -69,9 +69,25 @@ y_test = label_test
 # X_train, X_val = train_test_split(intent_train, test_size=0.1)
 
 embedding_dict = {}
-f = open('/home/alpha/문서/glove.6B/glove.6B.100d.txt', encoding='utf-8')
+f = open('/media/alpha/Samsung_T5/deepLearning/glove.6B/glove.6B.100d.txt', encoding='utf-8')
 for line in f:
     raw_table = line.split()
     word = raw_table[0]
     embedding_dict[word] = np.array(raw_table[1:], dtype='float32')
 f.close()
+
+# glove의 embedding 차원이 100이기 때문에
+embedding_dim = 100
+embedding_matrix = np.zeros((vocab_size, embedding_dim))
+
+for word, i in tk.word_index.items():
+    embedding_vector = embedding_dict.get(word)
+    if embedding_vector is not None:
+        embedding_matrix[i] = embedding_vector
+
+from keras.models import Model
+from keras.layers import Embedding, Dropout, Conv1D, GlobalMaxPooling1D, Dense, Input, Flatten, Concatenate
+
+kernel_size = [2, 3, 5]
+num_filters = 512
+dropout_ratio = 0.5
