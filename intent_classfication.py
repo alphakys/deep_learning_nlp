@@ -91,3 +91,16 @@ from keras.layers import Embedding, Dropout, Conv1D, GlobalMaxPooling1D, Dense, 
 kernel_size = [2, 3, 5]
 num_filters = 512
 dropout_ratio = 0.5
+
+# [STUDY] CONCATENATE ->
+#   x.shape
+#   Out[14]: (12, 1)
+#   y.shape
+#   Out[15]: (10, 1)
+#   axis에 세팅하는 차원을 제외한 나머지의 shape이 같아야 한다.
+# Concatenate(axis=0)([x,y])
+
+
+input = (5, 5, 5)
+
+x = Conv1D(kernel_size=2, filters=1, strides=1, padding='valid')()
