@@ -103,4 +103,21 @@ dropout_ratio = 0.5
 
 input = (5, 5, 5)
 
-x = Conv1D(kernel_size=2, filters=1, strides=1, padding='valid')()
+filters = 20
+
+# [STUDY] AXIS를 합쳐라 -> 내가 설정한 AXIS를 합쳐라
+# axis를 합쳐라 내가준 axis를 합쳐라 내가 준 axis를 합쳐라
+# aixs를 합쳐라 내가 준 axis를 합쳐라 axis를 합쳐라 내가 준 axis를 합쳐라
+
+# (5, 4, 20) ==> (4, 20) -> // (4, 1) * 20 //
+
+# kernel_size = 2 ==> weights = (2,5) => 자연스럽게 column은 input의 last channel과 같아진다. 즉 image processsing에서 말하는 depth
+# (5, 5) -> (4, 1) * 20 ==> (4,20)
+
+
+
+
+
+
+
+# x = Conv1D(kernel_size=2, filters=1, strides=1, padding='valid')()
