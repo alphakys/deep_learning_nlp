@@ -88,36 +88,32 @@ for word, i in tk.word_index.items():
 from keras.models import Model
 from keras.layers import Embedding, Dropout, Conv1D, GlobalMaxPooling1D, Dense, Input, Flatten, Concatenate
 
-kernel_size = [2, 3, 5]
+kernel_sizes = [2, 3, 5]
 num_filters = 512
 dropout_ratio = 0.5
 
-# [STUDY] CONCATENATE ->
-#   x.shape
-#   Out[14]: (12, 1)
-#   y.shape
-#   Out[15]: (10, 1)
-#   axis에 세팅하는 차원을 제외한 나머지의 shape이 같아야 한다.
-# Concatenate(axis=0)([x,y])
+model_input = Input(shape=(max_len,))
+output = Embedding(vocab_size, embedding_dim, weights=[embedding_matrix],
+                      input_length=max_len, trainable=False)(model_input)
+
+label_idx = dict(zip(list(idx_encode.classes_), idx_encode.transform(list(idx_encode.classes_))))
+
+conv_blocks = []
+
+for size in kernel_sizes:
+    conv = Conv1D(filters=num_filters,
+                         kernel_size=size,
+                         padding="valid",
+                         activation="relu",
+                         strides=1)(output)
+    conv = GlobalMaxPooling1D()(conv)
+    conv_blocks.append(conv)
 
 
-input = (5, 5, 5)
+output = Concatenate()(conv_blocks) if len(conv_blocks) > 1 else conv_blocks[0]
+output = Dropout(dropout_ratio)(output)
+model_output = Dense(len(label_idx), activation='softmax')(output)
+model = Model(model_input, model_output)
 
-filters = 20
-
-# [STUDY] AXIS를 합쳐라 -> 내가 설정한 AXIS를 합쳐라
-# axis를 합쳐라 내가준 axis를 합쳐라 내가 준 axis를 합쳐라
-# aixs를 합쳐라 내가 준 axis를 합쳐라 axis를 합쳐라 내가 준 axis를 합쳐라
-
-# (5, 4, 20) ==> (4, 20) -> // (4, 1) * 20 //
-
-# kernel_size = 2 ==> weights = (2,5) => 자연스럽게 column은 input의 last channel과 같아진다. 즉 image processsing에서 말하는 depth
-# (5, 5) -> (4, 1) * 20 ==> (4,20)
-
-
-
-
-
-
-
-# x = Conv1D(kernel_size=2, filters=1, strides=1, padding='valid')()
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+model.summary()
