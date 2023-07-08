@@ -53,10 +53,26 @@ y_train = tar_tokenizer.texts_to_sequences(ner_tags)
 index_to_word = src_tokenizer.index_word
 index_to_ner = tar_tokenizer.index_word
 
+max_len = 70
+X_train = pad_sequences(X_train, padding='post', maxlen=max_len)
+y_train = pad_sequences(y_train, padding='post', maxlen=max_len)
+
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=.2, random_state=777)
+
+y_train = to_categorical(y_train, num_classes=tag_size)
+y_test = to_categorical(y_test, num_classes=tag_size)
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM, Bidirectional, TimeDistributed
+from keras.optimizers import Adam
+
+embedding_dim = 128
+hidden_units = 128
+
 model = Sequential()
-model.add(Embedding(vocab_size, embedding_dim, input_length=avr_len, mask_zero=True))
+model.add(Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_len, mask_zero=True))
 model.add(Bidirectional(LSTM(hidden_units, return_sequences=True)))
 model.add(TimeDistributed(Dense(tag_size, activation='softmax')))
+
 model.compile(loss='categorical_crossentropy', optimizer=Adam(0.001), metrics=['accuracy'])
 model.fit(X_train, y_train, batch_size=128, epochs=8, validation_data=(X_test, y_test))
 
