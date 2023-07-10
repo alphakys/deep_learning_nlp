@@ -63,20 +63,48 @@ X_train, X_test, y_train_int, y_test_int = train_test_split(X_data, y_data, test
 y_train = to_categorical(y_train_int, num_classes=tag_size)
 y_test = to_categorical(y_test_int, num_classes=tag_size)
 
-from keras.models import Sequential
-from keras.layers import Dense, LSTM, InputLayer, Bidirectional, TimeDistributed, Embedding
-from keras.optimizers import Adam
+import tensorflow as tf
+from keras import Model
+from keras.layers import Dense, LSTM, Input, Bidirectional, TimeDistributed, Embedding, Dropout
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras_crf import CRFModel
+from seqeval.metrics import f1_score, classification_report
 
 embedding_dim = 128
-hidden_units = 256
+hidden_units = 64
+dropout_ratio = 0.3
 
-model = Sequential()
-model.add(Embedding(vocab_size, embedding_dim, mask_zero=True))
-model.add(Bidirectional(LSTM(hidden_units, return_sequences=True)))
+sequence_input = Input(shape=(max_len,), dtype=tf.int32, name='sequence_input')
+
+model_embedding = Embedding(input_dim=vocab_size,
+                            output_dim=embedding_dim,
+                            input_length=max_len)(sequence_input)
+
+model_bilstm = Bidirectional(LSTM(units=hidden_units, return_sequences=True))(model_embedding)
 # [STUDY] However, with return_sequences=False, Dense layer is applied only once at the last cell.
 #   This is normally the case when RNNs are used for classification problem.
 #   If return_sequences=True then Dense layer is applied to every timestep just like TimeDistributedDense.
-model.add(TimeDistributed(Dense(tag_size, activation=('softmax'))))
-model.compile(loss='categorical_crossentropy', optimizer=Adam(0.001), metrics=['accuracy'])
+model_dropout = TimeDistributed(Dropout(dropout_ratio))(model_bilstm)
 
-history = model.fit(X_train, y_train, batch_size=128, epochs=6, validation_split=0.1)
+model_dense = TimeDistributed(Dense(tag_size, activation='relu'))(model_dropout)
+
+base = Model(inputs=sequence_input, outputs=model_dense)
+model = CRFModel(base, tag_size)
+model.compile(optimizer=tf.keras.optimizers.Adam(0.001), metrics='accuracy')
+
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+# mc = ModelCheckpoint('bilstm_crf/cp.ckpt', monitor='val_decode_sequence_accuracy', mode='max', verbose=1, save_best_only=True, save_weights_only=True)
+
+history = model.fit(X_train, y_train_int, batch_size=128, epochs=15, validation_split=0.1, callbacks=[es])
+
+#
+#
+# model = Sequential()
+# model.add(Embedding(vocab_size, embedding_dim, mask_zero=True))
+# model.add(Bidirectional(LSTM(hidden_units, return_sequences=True)))
+# model.add(TimeDistributed(Dense(tag_size, activation=('softmax'))))
+# model.compile(loss='categorical_crossentropy', optimizer=Adam(0.001), metrics=['accuracy'])
+#
+# history = model.fit(X_train, y_train, batch_size=128, epochs=6, validation_split=0.1)
+for seq in test_seq:
+    print([index_to_ner[entity] for entity in seq])
