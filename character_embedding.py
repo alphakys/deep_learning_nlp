@@ -37,4 +37,4 @@ from keras.models import load_model
 from seqeval.metrics import f1_score, classification_report
 from keras_crf import CRFModel
 
-conv1d_out = TimeDistributed(Conv1D(filters=, kernel_size=, activation=))
+# conv1d_out = TimeDistributed(Conv1D(filters=, kernel_size=, activation=))
