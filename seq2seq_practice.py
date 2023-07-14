@@ -100,9 +100,10 @@ decoder_target = to_categorical(decoder_target)
 
 # [STUDY] return_sequences와 return_state의 설명을 알고 싶다면
 #  https://wikidocs.net/106473
+from keras.layers import Input, LSTM, Embedding, Dense
 from keras.models import Model
-from keras.layers import Input, LSTM
 import numpy as np
+
 encoder_inputs = Input(shape=(None, src_vocab_size))
 encoder_lstm = LSTM(units=256, return_state=True)
 
@@ -112,5 +113,15 @@ encoder_outputs, state_h, state_c = encoder_lstm(encoder_inputs)
 # LSTM은 바닐라 RNN과는 달리 상태가 두 개. 은닉 상태와 셀 상태.
 encoder_states = [state_h, state_c]
 
+decoder_inputs = Input(shape=(None, tar_vocab_size))
+decoder_lstm = LSTM(units=256, return_sequences=True, return_state=True)
 
+# 디코더에게 인코더의 은닉 상태, 셀 상태를 전달.
+decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
+decoder_softmax_layer = Dense(tar_vocab_size, activation='softmax')
+decoder_outputs = decoder_softmax_layer(decoder_outputs)
 
+model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
+
+model.fit(x=[encoder_input, decoder_input], y=decoder_target, batch_size=64, epochs=40, validation_split=0.2)
