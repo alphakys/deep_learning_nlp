@@ -46,3 +46,16 @@ class BahdanauAttention(keras.Model):
 
 
 
+# q, k, v
+
+# k, v는 동일하다.
+
+# 핵심은 decoder의 hidden_state와 유사한 encoder의 hidden_state를 찾는 것이다.
+# decoder의 hidden_state와 유사한 encoder의 hidden state를 찾는 것을 쿼리 q라고 한다.
+
+# 그리고 k, v가 encoder의 hidden_state이다.
+
+
+
+
+
