@@ -53,13 +53,13 @@ decoder_target = [decoder[1:] for decoder in decoder_input]
 max_src_len = max([len(line) for line in lines.src])
 max_tar_len = max([len(line) for line in lines.tar])
 
-encoder_input = pad_sequences(encoder_input, maxlen=max_src_len, padding='post')
-decoder_input = pad_sequences(decoder_input, maxlen=max_tar_len, padding='post')
-decoder_target = pad_sequences(decoder_target, maxlen=max_tar_len, padding='post')
+encoder_input_pad = pad_sequences(encoder_input, maxlen=max_src_len, padding='post')
+decoder_input_pad = pad_sequences(decoder_input, maxlen=max_tar_len, padding='post')
+decoder_target_pad = pad_sequences(decoder_target, maxlen=max_tar_len, padding='post')
 
-encoder_input = to_categorical(encoder_input)
-decoder_input = to_categorical(decoder_input)
-decoder_target = to_categorical(decoder_target)
+encoder_input = to_categorical(encoder_input_pad)
+decoder_input = to_categorical(decoder_input_pad)
+decoder_target = to_categorical(decoder_target_pad)
 
 from keras.layers import Input, LSTM, Embedding, Dense
 from keras.models import Model
