@@ -62,4 +62,9 @@ decoder_input = to_categorical(decoder_input_pad)
 decoder_target = to_categorical(decoder_target_pad)
 
 from keras.layers import Input, LSTM, Embedding, Dense
-from keras.models import Model
+from keras.models import Model, Functional
+
+# return_state=True이면 cell state와 hidden state까지 반환 받는다.
+# return_sequences=True이면 매 step 마다 나오는 hidden state를 다 반환한다.
+
+Model
