@@ -67,4 +67,69 @@ from keras.models import Model, Functional
 # return_state=True이면 cell state와 hidden state까지 반환 받는다.
 # return_sequences=True이면 매 step 마다 나오는 hidden state를 다 반환한다.
 
-Model
+encoder_inputs = Input(shape=(None, src_vocab_size))
+# return_state=True -> Last Hidden State + Last Hidden State + Last Cell State
+# lstm output means finally Last Hidden State!!
+
+# [STUDY] 중요!! return_sequences=True + return_state=True ==> All Hidden States + Last Hidden State + Last Cell State
+encoder_lstm = LSTM(units=256, return_state=True)
+
+# encoder_outputs은 여기서는 불필요
+# 이유는 state_h랑 같기 때문에
+encoder_outputs, state_h, state_c = encoder_lstm(encoder_inputs)
+
+# LSTM은 바닐라 RNN과는 달리 상태가 두 개. 은닉 상태와 셀 상태.
+encoder_states = [state_h, state_c]
+
+
+decoder_inputs = Input(shape=(None, tar_vocab_size))
+decoder_lstm = LSTM(units=256, return_sequences=True, return_state=True)
+
+# 디코더에게 인코더의 은닉 상태, 셀 상태를 전달.
+decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
+
+decoder_softmax_layer = Dense(tar_vocab_size, activation='softmax')
+decoder_outputs = decoder_softmax_layer(decoder_outputs)
+
+model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
+model.fit(x=[encoder_input, decoder_input], y=decoder_target, batch_size=64, epochs=10, validation_split=0.2)
+
+
+# The model class
+# A model grouping layers into an object with training/inference features
+# Arguments
+# inputs = The inputs of the model : a keras.Input object or a combination of keras.Input objects in a dict, list or tuple
+# a keras.Input object or a combination of keras.Input objects in a dict, list or tuple
+encoder_model = Model(inputs=encoder_inputs, outputs=encoder_states)
+
+
+
+
+
+
+# encoder_lstm = LSTM(units=256, return_state=True) -> encoder_outputs(last hidden state), hidden_state(last hidden state), cell state(last cell state)
+# 따라서
+# encoder_outputs, encod_state_h, encod_state_c = encoder_lstm(encoder_inputs)
+# encoder_states = [encod_state_h, encod_state_c]
+
+# encoder_model = Model(inputs=encoder_inputs, outputs=encoder_states)
+# 결국!!!!!!!
+# encoder_model(인코딩 input[1]) == encoder_lstm(인코딩 input[1]) ==> 결과물 중에서 [encoding_state_h, encoding_state_c]와 같다!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
