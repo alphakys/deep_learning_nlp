@@ -7,6 +7,7 @@ import pandas as pd
 import tensorflow as tf
 from keras.utils import pad_sequences
 from keras.utils import to_categorical
+import numpy as np
 import timeit
 
 lines = pd.read_csv('fra.txt', names=['src', 'tar', 'lic'], sep='\t')
@@ -26,6 +27,9 @@ tar_vocab = sorted(list(tar_vocab))
 
 src_to_index = {v: i + 1 for i, v in enumerate(src_vocab)}
 tar_to_index = {v: i + 1 for i, v in enumerate(tar_vocab)}
+
+index_to_src = {v: k for k, v in src_to_index.items()}
+index_to_tar = {v: k for k, v in tar_to_index.items()}
 
 encoder_input = []
 
@@ -93,7 +97,7 @@ decoder_outputs = decoder_softmax_layer(decoder_outputs)
 
 model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
-model.fit(x=[encoder_input, decoder_input], y=decoder_target, batch_size=64, epochs=10, validation_split=0.2)
+model.fit(x=[encoder_input, decoder_input], y=decoder_target, batch_size=64, epochs=1, validation_split=0.2)
 
 
 # The model class
