@@ -85,7 +85,6 @@ encoder_outputs, state_h, state_c = encoder_lstm(encoder_inputs)
 # LSTM은 바닐라 RNN과는 달리 상태가 두 개. 은닉 상태와 셀 상태.
 encoder_states = [state_h, state_c]
 
-
 decoder_inputs = Input(shape=(None, tar_vocab_size))
 decoder_lstm = LSTM(units=256, return_sequences=True, return_state=True)
 
@@ -99,41 +98,24 @@ model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
 model.fit(x=[encoder_input, decoder_input], y=decoder_target, batch_size=64, epochs=1, validation_split=0.2)
 
+# 1. return_state = True -> 1. last hidden state(encoder_outputs) 2. last hidden state 3. last cell state
+# 2. return_sequences=True -> 1. all of hidden states
+# 3. return_state=True, return_sequences=True -> 1. all of hidden states 2. last hidden state 3. last cell state
 
-# The model class
-# A model grouping layers into an object with training/inference features
-# Arguments
-# inputs = The inputs of the model : a keras.Input object or a combination of keras.Input objects in a dict, list or tuple
-# a keras.Input object or a combination of keras.Input objects in a dict, list or tuple
 encoder_model = Model(inputs=encoder_inputs, outputs=encoder_states)
 
+# 이전 시점의 상태들을 저장하는 텐서
+decoder_state_input_h = Input(shape=(256,))
+decoder_state_input_c = Input(shape=(256,))
+decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
 
+# 문장의 다음 단어를 예측하기 위해서 초기 상태를 이전 시점의 상태로 사용.
+decoder_outputs, state_h, state_c = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
 
+# 훈련 과정에서와 달리 lstm의 리턴하는 은닉 상태와 셀 상태를 버리지 않음
+decoder_states = [state_h, state_c]
+decoder_outputs = decoder_softmax_layer(decoder_outputs)
+decoder_model = Model(inputs=[decoder_inputs] + decoder_states_inputs, outputs=[decoder_outputs] + decoder_states)
 
-
-
-# encoder_lstm = LSTM(units=256, return_state=True) -> encoder_outputs(last hidden state), hidden_state(last hidden state), cell state(last cell state)
-# 따라서
-# encoder_outputs, encod_state_h, encod_state_c = encoder_lstm(encoder_inputs)
-# encoder_states = [encod_state_h, encod_state_c]
-
-# encoder_model = Model(inputs=encoder_inputs, outputs=encoder_states)
-# 결국!!!!!!!
-# encoder_model(인코딩 input[1]) == encoder_lstm(인코딩 input[1]) ==> 결과물 중에서 [encoding_state_h, encoding_state_c]와 같다!!!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+index_to_src = dict((i, char) for char, i in src_to_index.items())
+index_to_tar = dict((i, char) for char, i in tar_to_index.items())
