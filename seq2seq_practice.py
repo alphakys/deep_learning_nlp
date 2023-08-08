@@ -119,3 +119,30 @@ decoder_model = Model(inputs=[decoder_inputs] + decoder_states_inputs, outputs=[
 
 index_to_src = dict((i, char) for char, i in src_to_index.items())
 index_to_tar = dict((i, char) for char, i in tar_to_index.items())
+
+def decode_sequence(input_seq):
+    # get state from input
+    # predict를 사용한다는 것은 대용량의 input에 대한 prediction을 얻기 위함이다.
+    states_value = encoder_model.predict(input_seq)
+    print(states_value)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
