@@ -120,12 +120,34 @@ decoder_model = Model(inputs=[decoder_inputs] + decoder_states_inputs, outputs=[
 index_to_src = dict((i, char) for char, i in src_to_index.items())
 index_to_tar = dict((i, char) for char, i in tar_to_index.items())
 
+
 def decode_sequence(input_seq):
     # get state from input
     # predict를 사용한다는 것은 대용량의 input에 대한 prediction을 얻기 위함이다.
+    # encoder에서 나온 hidden_state와 cell_state가 -> state_value
     states_value = encoder_model.predict(input_seq)
-    print(states_value)
 
+    # sos에 해당하는 원-핫 벡터 생성
+    target_seq = np.zeros((1, 1, tar_vocab_size))
+    target_seq[0, 0, tar_to_index['\t']] = 1
+
+    stop_condition = False
+    decoded_sentence = ''
+
+    # stop_condition이 True가 될 때까지 loop
+    while not stop_condition:
+        # 이전 시점의 상태 states_value를 현 시점의 초기 상태로 사용
+        # decoder_model = Model(inputs=[decoder_inputs] + decoder_states_inputs,)
+        # sos 시그널이 들어갈 때는 endoeer에서 나온 encoder_states가 초기 값으로 들어감
+        output_tokens, h, c = decoder_model.predict([target_seq] + states_value)
+        print([l.shape for l in decoder_model.predict([target_seq] + states_value)])
+
+        # 예측 결과를 문자로 변환
+        # sampled_token_index = np.argmax(output_tokens[0, -1, :])
+        # print(output_tokens)
+        # print(h)
+        # print(c)
+        stop_condition = True
 
 
 
