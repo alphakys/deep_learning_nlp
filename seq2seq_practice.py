@@ -140,14 +140,24 @@ def decode_sequence(input_seq):
         # decoder_model = Model(inputs=[decoder_inputs] + decoder_states_inputs,)
         # sos 시그널이 들어갈 때는 endoeer에서 나온 encoder_states가 초기 값으로 들어감
         output_tokens, h, c = decoder_model.predict([target_seq] + states_value)
-        print([l.shape for l in decoder_model.predict([target_seq] + states_value)])
 
         # 예측 결과를 문자로 변환
-        # sampled_token_index = np.argmax(output_tokens[0, -1, :])
-        # print(output_tokens)
-        # print(h)
-        # print(c)
-        stop_condition = True
+        sampled_token_index = np.argmax(output_tokens[0, -1, :])
+        sampled_char = index_to_tar[sampled_token_index]
+
+        # 현재 시점의 예측 문자를 예측 문장에 추가
+        decoded_sentence += sampled_char
+
+        if sampled_char == '\n' or len(decoded_sentence) > max_tar_len:
+            stop_condition = True
+
+        # 현재 시점의 예측 결과를 다음 시점의 입력으로 사용하기 위해 저장
+        target_seq = np.zeros((1,1,tar_vocab_size))
+        target_seq[0, 0, sampled_token_index] = 1
+
+        states_value = [h, c]
+
+    return decoded_sentence
 
 
 
